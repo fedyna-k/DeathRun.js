@@ -42,21 +42,4 @@ class KeyRecorder {
 
         return delta;
     }
-
-    /**
-     * Compute the difference in y according to keypress.
-     * @returns The difference in y for the current player.
-     */
-    updateY() {
-        let delta = 0;
-
-        if (this.isPressed("ArrowUp")) {
-            delta -= 1;
-        }
-        if (this.isPressed("ArrowDown")) {
-            delta += 1;
-        }
-
-        return delta;
-    }
 }

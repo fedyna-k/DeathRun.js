@@ -16,6 +16,14 @@ class Character {
     }
 
     /**
+     * Get the character's coordinates.
+     * @returns {{x: number, y: number}} The coordinates as an Object.
+     */
+    getCoordinates() {
+        return {x: this.#x, y: this.#y};
+    }
+
+    /**
      * Draws the beautiful box guy.
      */
     draw() {
@@ -30,8 +38,14 @@ class Character {
      */
     update() {
         let deltaX = this.#updater.updateX();
-        let deltaY = this.#updater.updateY();
         this.#x += deltaX;
-        this.#y += deltaY;
+    }
+
+    /**
+     * Clip the character on the ground below him.
+     * @param {{object: Ground, args: any}} ground The ground below the character.
+     */
+    clip(ground) {
+        this.#y = ground.object.getPointAt(this.#x, ground.args) - 50;
     }
 }

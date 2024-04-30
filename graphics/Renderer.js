@@ -121,13 +121,11 @@ class Renderer {
     /**
      * Add a new ground inside the ground pipeline. Will only be drawn if visible.
      * @param {Ground} ground The new ground to add.
-     * @param {"lerp"|"steps"|"cubic"|"smoother"} interpolationType The interpolation function we want to use.
      * @param {undefined|[number, undefined|boolean]} args The interpolation function arguments.
      */
-    insertGroundIntoPipeline(ground, interpolationType, args) {
+    insertGroundIntoPipeline(ground, args) {
         this.#groundPipeline.push({
             object: ground,
-            interpolationType: interpolationType,
             args: args
         });
     }
@@ -162,13 +160,14 @@ class Renderer {
         // Render the character pipeline.
         for (let character of this.#charactersPipeline) {
             character.update();
+            character.clip(this.#groundPipeline[0]);
             character.draw();
         }
 
         // Render the ground pipeline.
         this.#context.fillStyle = "black";
         for (let ground of this.#groundPipeline) {
-            ground.object.draw(this.#context, ground.interpolationType, ground.args);
+            ground.object.draw(this.#context, ground.args);
         }
 
         // If wanted, render and compute fps

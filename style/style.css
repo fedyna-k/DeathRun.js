@@ -1,0 +1,78 @@
+body{
+    margin: 0;
+    padding: 0;
+    
+}
+
+#canvaContainer{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.sidenav {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: -250px;
+    background-color: #fff9f9;
+    padding-top: 60px;
+    transition: left 0.5s ease;
+  }
+  
+  
+  .sidenav a,li {
+    padding: 4px 8px 4px 16px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #353330;
+    display: block;
+    transition: 0.3s;
+  }
+  
+  .sidenav a:hover,li:hover {
+    color: #111;
+  }
+  
+  .sidenav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+
+  .sidenav.active {
+    left: 0;
+  }
+  
+  
+  .sidenav .close {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+  }
+  
+  
+  
+  .burger-icon span {
+    margin: 0 0 0 0;
+    display: block;
+    width: 35px;
+    height: 5px;
+    background-color: black;
+    margin: 6px 0 0 6px;
+  }
+  
+
+  .jscolor {
+    position: absolute;
+    z-index: 1000;
+    top: 25px;
+    left: -150px;
+  }
+  

@@ -25,12 +25,22 @@ class Character {
 
     /**
      * Draws the beautiful box guy.
+     * @param {{object: Ground, args: any}} ground The ground below the character.
      */
-    draw() {
+    draw(ground) {
+        let rotationAngle = ground.object.getRotationAt(this.#x);
+        
         ctx.globalCompositeOperation = "soft-light";
         ctx.fillStyle = "white";
-        ctx.fillRect(this.#x - 10, this.#y, 20, 50)
-        ctx.globalCompositeOperation = "source-over"
+
+        ctx.translate(this.#x, this.#y + 50);
+        ctx.rotate(rotationAngle);
+        ctx.translate(-this.#x, -this.#y - 50);
+
+        ctx.fillRect(this.#x - 10, this.#y, 20, 50);
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalCompositeOperation = "source-over";
     }
 
     /**

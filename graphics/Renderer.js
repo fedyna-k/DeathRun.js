@@ -161,7 +161,7 @@ class Renderer {
         for (let character of this.#charactersPipeline) {
             character.update();
             character.clip(this.#groundPipeline[0]);
-            character.draw();
+            character.draw(this.#groundPipeline[0]);
         }
 
         // Render the ground pipeline.

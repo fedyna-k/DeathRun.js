@@ -85,6 +85,7 @@ class Interpolation {
     /**
      * Get the rotation angle (using the normal vector) for a linear interpolation between a and b.
      * @param {number} t The interpolation parameter (between 0 and 1).
+     * @param {number} xLength The ground length in terms of X.
      * @returns {number} The rotation angle at t.
      * 
      * @see https://en.wikipedia.org/wiki/Linear_interpolation
@@ -99,6 +100,7 @@ class Interpolation {
     /**
      * Get the rotation angle (using the normal vector) for a stepped linear interpolation between a and b.
      * @param {number} t The interpolation parameter (between 0 and 1).
+     * @param {number} xLength The ground length in terms of X.
      * @returns {number} The rotation angle at t.
      * 
      * @see https://en.wikipedia.org/wiki/Linear_interpolation
@@ -111,6 +113,7 @@ class Interpolation {
     /**
      * Get the rotation angle (using the normal vector) for a cubic interpolation between a and b.
      * @param {number} t The interpolation parameter (between 0 and 1).
+     * @param {number} xLength The ground length in terms of X.
      * @returns {number} The rotation angle at t.
      * 
      * @see https://en.wikipedia.org/wiki/Smoothstep
@@ -125,6 +128,7 @@ class Interpolation {
     /**
      * Get the rotation angle (using the normal vector) for a quintic interpolation between a and b.
      * @param {number} t The interpolation parameter (between 0 and 1).
+     * @param {number} xLength The ground length in terms of X.
      * @returns {number} The rotation angle at t.
      * 
      * @see https://en.wikipedia.org/wiki/Smoothstep

@@ -9,6 +9,7 @@ class Ground {
     #yLimit;
 
     #interpolationFunction;
+    #rotationFunction;
 
     /**
      * Create a ground object
@@ -25,10 +26,11 @@ class Ground {
         this.#yLimit = inverted ? Math.min(pointA[1], pointB[1]) : Math.max(pointA[1], pointB[1]);
 
         this.#interpolationFunction = this.#getInterpolationFunction(interpolationType);
+        this.#rotationFunction = this.#getRotationFunction(interpolationType);
     }
 
     /**
-     * 
+     * Gets the interpolation function for the corresponding type.
      * @param {"lerp"|"steps"|"cubic"|"smoother"} interpolationType The interpolation function we want to use.
      * @returns {function} The correct interpolation function.
      */
@@ -44,6 +46,26 @@ class Ground {
         }
         if (interpolationType == "smoother") {
             return this.#ys.smoother;
+        }
+    }
+
+    /**
+     * Gets the rotation function for the corresponding type.
+     * @param {"lerp"|"steps"|"cubic"|"smoother"} interpolationType The interpolation function we want to use.
+     * @returns {function} The correct rotation function.
+     */
+    #getRotationFunction(interpolationType) {
+        if (interpolationType == "lerp") {
+            return this.#ys.lerpRotation;
+        }
+        if (interpolationType == "steps") {
+            return this.#ys.stepsRotation;
+        }
+        if (interpolationType == "cubic") {
+            return this.#ys.cubicRotation;
+        }
+        if (interpolationType == "smoother") {
+            return this.#ys.smootherRotation;
         }
     }
 
@@ -77,5 +99,15 @@ class Ground {
         } else {
             return this.#interpolationFunction.apply(this.#ys, [t]);
         }
+    }
+
+    /**
+     * Give the rotation vector at a provided x.
+     * @param {number} x The x coordinate we want to compute the rotation vector at.
+     */
+    getRotationAt(x) {
+        let t = (x - this.#xa) / (this.#xb - this.#xa);
+
+        return this.#rotationFunction.apply(this.#ys, [t, this.#xb - this.#xa]);
     }
 }

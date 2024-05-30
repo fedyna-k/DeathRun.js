@@ -8,7 +8,7 @@ class Ground {
     #ys;
     #yLimit;
 
-    #interpolationFunction;
+    #interpolationFunction; 
     #rotationFunction;
 
     /**
@@ -85,6 +85,9 @@ class Ground {
             }
         }
     }
+
+
+
 
     /**
      * Give the y corresponding to the provided x.

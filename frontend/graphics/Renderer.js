@@ -160,6 +160,9 @@ class Renderer {
     }
 
 
+
+    
+
     /**
      * The rendering core is where all the pipelines are rendered.
      * The rendering order is :
@@ -174,7 +177,6 @@ class Renderer {
         this.#context.fillStyle = "black";
         this.#context.fillRect(0, 0, this.#width, this.#height);
         //this.#context.translate(-this.#viewportX, -this.#viewportY);
-
         // Render the light pipeline.
         for (let light of this.#lightPipeline) {
             this.#lightMap[light.key].draw(this.#context, light.x, light.y, light.lightAngle, light.spreadAngle);
@@ -183,7 +185,6 @@ class Renderer {
         // Render the character pipeline.
         for (let character of this.#charactersPipeline) {
             character.update(this.#groundPipeline[0]);
-            character.clip(this.#groundPipeline[0]);
             character.draw(this.#groundPipeline[0]);
         }
 

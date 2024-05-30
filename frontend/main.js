@@ -31,6 +31,12 @@ function handleInput() {
     if (keyState[" "]) {
         socket.emit('move character', { x: 0, y: -1 });
     }
+    if (keyState['e'] || keyState['E']) {
+        // Vérifie si le piégeur est proche du bouton et si c'est le cas, envoie un signal au serveur
+        if (isNearButton(charactersData[localPlayerId], button)) {
+            socket.emit('activate button', { buttonId: 1 }); // Envoyer l'ID du bouton si plusieurs boutons
+        }
+    }
 }
 
 setInterval(handleInput, 1000 / 30);

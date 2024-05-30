@@ -12,6 +12,7 @@ socket.on('init characters', function(initCharacters) {
         if (char.id === socket.id) {
             localPlayerId = char.id;
             renderer.setViewport(char.x, char.y);
+            console.log("role du perso : ", char.id, ": " , char.role)
         }
     });
 });
@@ -34,6 +35,25 @@ socket.on('remove character', function(charId) {
         delete charactersData[charId];
     }
 });
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'e' || event.key === 'E') {
+        if (localPlayerId === trapperId && isNearButton(characterInstances[localPlayerId], button)) {
+            socket.emit('activate button', { buttonId: 1 });
+        }
+    }
+});
+
+// Vérifier la proximité du bouton
+function isNearButton(character, button) {
+    return Math.abs(character.getCoordinates().x - button.x) < 50 && Math.abs(character.getCoordinates().y - button.y) < 50;
+}
+
+// Réagir à l'activation du bouton
+socket.on('button activated', function(data) {
+    console.log(`Le bouton ${data.buttonId} a été activé.`);
+});
+
 
 
 

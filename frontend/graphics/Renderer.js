@@ -160,8 +160,27 @@ class Renderer {
     }
 
 
+    checkCollision(character1, character2) {
+        let bounds1 = character1.getBounds();
+        let bounds2 = character2.getBounds();
+        // Vérifie si les bounding boxes se chevauchent
+        if (bounds1.xMin < bounds2.xMax && bounds1.xMax > bounds2.xMin &&
+            bounds1.yMin < bounds2.yMax && bounds1.yMax > bounds2.yMin) {
+            return true;
+        }
+        return false;
+    }
 
-    
+    handleCollision(character1, character2) {
+        if (this.checkCollision(character1, character2)) {
+            // Repousser les personnages l'un de l'autre
+            let coords1 = character1.getCoordinates();
+            let coords2 = character2.getCoordinates();
+            // ici logique on repousse les personnages
+            
+            console.log("Collision détectée entre personnages!");
+        }
+    }
 
     /**
      * The rendering core is where all the pipelines are rendered.
@@ -183,6 +202,13 @@ class Renderer {
             this.#lightMap[light.key].draw(this.#context, light.x, light.y, light.lightAngle, light.spreadAngle);
         }
 
+        // Mettre à jour et vérifier les collisions pour chaque personnage
+        for (let i = 0; i < this.#charactersPipeline.length; i++) {
+            for (let j = i + 1; j < this.#charactersPipeline.length; j++) {
+                this.handleCollision(this.#charactersPipeline[i], this.#charactersPipeline[j]);
+            }
+        }
+        
         for (let character of this.#charactersPipeline) {
             let charX = character.position().x;
             let groundsUnder = this.#groundPipeline.filter(ground => ground.object.getXBounds().min <= charX && charX <= ground.object.getXBounds().max);

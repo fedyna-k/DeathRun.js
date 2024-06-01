@@ -8,12 +8,11 @@ canvas.height = 800;
 let renderer = new Renderer(ctx, canvas.width, canvas.height);
 // let ground = new Ground([0, 400], [800, 400], "lerp");
 let platforms = [
-    new Ground([250, 300], [280, 280], "lerp"),
-    new Ground([350, 400], [380, 380], "lerp"),
-    // new Ground([550, 200], [750, 200], "lerp"),
-
+    new Ground([200, 350], [250, 350], "cubic"),
+    new Ground([300, 400], [350, 390], "lerp"),
+    new Ground([550, 320], [600, 330], "smoother"),
+    new Ground([650, 270], [700, 275], "cubic"),
 ];
-
 
 const keyState = {};
 
@@ -29,26 +28,29 @@ document.addEventListener('keyup', function(event) {
 
 function handleInput() {
     if (keyState["ArrowLeft"]) {
-        socket.emit('move character', { x: -10, y: 0 });
+        socket.emit('move character', { id: localPlayerId, x: -10, y: 0 });
     }
     if (keyState["ArrowRight"]) {
-        socket.emit('move character', { x: 10, y: 0 });
+        socket.emit('move character', { id: localPlayerId,  x: 10, y: 0 });
     }
     if (keyState[" "]) {
-        socket.emit('move character', { x: 0, y: -1 });
+        socket.emit('move character', { id: localPlayerId,  x: 0, y: -1 });
+    }
+    if (keyState["e"] ||keyState["E"]){
+        socket.emit('grab character', {id: localPlayerId});
     }
 }
 
 setInterval(handleInput, 1000 / 30);
 
 
-let heightNoise = new Noise(918982, 500, 40);
+let heightNoise = new Noise(981, 500, 40);
 let firstHeight = 500;
 let secondHeight = heightNoise.generateNext();
 
 
-for (let i = 0 ; i < 5 ; i++) {
-    
+for (let i = 1 ; i < 4 ; i++) {
+    console.log([i * 160, firstHeight],  [(i+1) * 160, secondHeight]);
     let ground = new Ground([i * 160, firstHeight], [(i+1) * 160, secondHeight], heightNoise.getTerrainTypeFlag());
     firstHeight = secondHeight;
     secondHeight = heightNoise.generateNext();
@@ -58,7 +60,7 @@ for (let i = 0 ; i < 5 ; i++) {
 
 let white = new Light(1000);
 renderer.addLightSource(white, "w");
-renderer.insertLightIntoPipeline("w", 200, 200, 1, Math.PI);
+renderer.insertLightIntoPipeline("w", 100, 100, 1, Math.PI);
 
 // renderer.insertGroundIntoPipeline(ground, [20, false]);
 platforms.forEach(platform => {

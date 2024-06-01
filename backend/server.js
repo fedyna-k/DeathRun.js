@@ -40,14 +40,26 @@ io.on('connection', (socket) => {
     socket.emit('init characters', Object.values(characters));
 
 
-    socket.on('move character', (movement) => {
+    socket.on('move character', (data) => {
         if (characters[socket.id] && socket.id === localPlayerId) {
-            characters[socket.id].x += movement.x;
-            characters[socket.id].y = movement.y;
+            characters[socket.id].x += data.x;
+            Object.values(characters).forEach(otherChar => {
+                if (otherChar.id !== data.id && checkCollision(characters[data.id], otherChar)) {
+                    resolveCollision(characters[data.id], otherChar);
+                }
+            });
+            characters[socket.id].y = data.y;
+            
             io.emit('update character', characters[socket.id]);
             characters[socket.id].y = 0;
         }
     });
+
+    socket.on('grab character', (id) => {
+        // il faut check si un autre joueur est pas loin
+        // si oui, position de l'autre joueur = position du joueur courant + 20y
+        // sinon on fait rien
+    })
 
     socket.on('disconnect', () => {
         console.log('user disconnected');
@@ -67,3 +79,35 @@ io.on('connection', (socket) => {
 server.listen(3000, () => {
     console.log('listening on *:3000');
 });
+
+
+function resolveCollision(character1, character2) {
+    let coords1 = {x: character1.x, y: character1.y};
+    let coords2 = {x: character2.x, y: character2.y};
+
+    // let overlapX = (coords1.x < coords2.x) ? (coords1.x + 20 - coords2.x) : (coords2.x + 20 - coords1.x);
+    // let overlapY = (coords1.y < coords2.y) ? (coords1.y + 50 - coords2.y) : (coords2.y + 50 - coords1.y);
+
+    // // Simple repoussement : les personnages sont légèrement décalés à l'opposé l'un de l'autre
+    // if (coords1.x < coords2.x) {
+    //     character1.x = coords1.x - overlapX / 2;
+    //     character2.x = coords2.x + overlapX / 2;
+    // } else {
+    //     character1.x = coords1.x + overlapX / 2;
+    //     character2.x = coords2.x - overlapX / 2;
+    // }
+    character1.x +=20;
+}
+
+function checkCollision(character1, character2) {
+
+    let bounds1 = {xMin: character1.x, xMax: character1.x + 20, yMin: character1.y, yMax: character1.y + 50};
+    let bounds2 = {xMin: character2.x, xMax: character2.x + 20, yMin: character2.y, yMax: character2.y + 50};
+
+    // Vérifie si les bounding boxes se chevauchent
+    if (bounds1.xMin < bounds2.xMax && bounds1.xMax > bounds2.xMin &&
+        bounds1.yMin < bounds2.yMax && bounds1.yMax > bounds2.yMin) {
+        return true;
+    }
+    return false;
+}

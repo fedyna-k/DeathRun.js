@@ -24,6 +24,20 @@ class Character {
 
 
     /**
+     * Get the character's bounds
+     * @returns {{xMin: number, yMin: number, xMax: number, yMax: number}} The bounds
+     */
+    getBounds() {
+        return {
+            xMin: this.#x,
+            xMax: this.#x + 20,
+            yMin: this.#y,
+            yMax: this.#y + 50
+        };
+    }
+
+
+    /**
      * Get the character's coordinates.
      * @returns {{x: number, y: number}} The coordinates as an Object.
      */

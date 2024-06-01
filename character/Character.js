@@ -30,7 +30,7 @@ class Character {
     draw(ground) {
         let rotationAngle = ground.object.getRotationAt(this.#x);
         
-        ctx.globalCompositeOperation = "soft-light";
+        // ctx.globalCompositeOperation = "soft-light";
         ctx.fillStyle = "white";
 
         ctx.translate(this.#x, this.#y + 50);
@@ -57,5 +57,13 @@ class Character {
      */
     clip(ground) {
         this.#y = ground.object.getPointAt(this.#x, ground.args) - 50;
+    }
+
+    /**
+     * Getter for the character position.
+     * @returns The character position.
+     */
+    position() {
+        return {x: this.#x, y: this.#y};
     }
 }

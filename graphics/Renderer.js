@@ -160,12 +160,15 @@ class Renderer {
         // Render the character pipeline.
         for (let character of this.#charactersPipeline) {
             character.update();
-            character.clip(this.#groundPipeline[0]);
-            character.draw(this.#groundPipeline[0]);
+
+            let charX = character.position().x;
+            let groundsUnder = this.#groundPipeline.filter(ground => ground.object.getXBounds().min <= charX && charX <= ground.object.getXBounds().max);
+            character.clip(groundsUnder[0]);
+            character.draw(groundsUnder[0]);
         }
 
         // Render the ground pipeline.
-        this.#context.fillStyle = "black";
+        this.#context.fillStyle = "gray";
         for (let ground of this.#groundPipeline) {
             ground.object.draw(this.#context, ground.args);
         }

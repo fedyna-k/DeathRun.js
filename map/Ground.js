@@ -110,4 +110,15 @@ class Ground {
 
         return this.#rotationFunction.apply(this.#ys, [t, this.#xb - this.#xa]);
     }
+
+    /**
+     * Get the x boundaries of the ground.
+     * @returns The x bounds of the ground.
+     */
+    getXBounds() {
+        return {
+            min: this.#xa,
+            max: this.#xb
+        };
+    }
 }

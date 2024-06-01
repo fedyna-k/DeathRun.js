@@ -5,6 +5,8 @@ class Character {
     #velocityY;
     #isJumping;
     #gravity = 0.2;
+    #lastJumpTime; // Timestamp du dernier saut
+    #jumpCooldown = 500;
 
     /**
      * Creates a new character on screen (currently a box).
@@ -17,6 +19,7 @@ class Character {
         this.#color = color;
         this.#velocityY = 0; 
         this.#isJumping = false;
+        this.#lastJumpTime = 0;
     }
 
 
@@ -53,27 +56,21 @@ class Character {
      * Update the coordinates, not that fancy for the moment.
      */
     update(ground) {
-        if (this.#isJumping) {
-            this.#velocityY += this.#gravity; // Applique la gravité
-            this.#velocityY *= 0.99;
-            this.#y += this.#velocityY; 
+        this.#velocityY += this.#gravity; // Applique la gravité
+        this.#velocityY *= 0.99;
+        this.#y += this.#velocityY;
 
-            let groundY = ground.object.getPointAt(this.#x, ground.args);
-            // Collision avec le sol
-            if (this.#y > groundY - 50) { 
-                this.#y = groundY - 50;
-                this.#isJumping = false;
-                this.#velocityY = 0;
-            }
+        let groundY = ground ? ground.object.getPointAt(this.#x, ground.args) : null;
+        
+        if (groundY !== null && this.#x >= ground.object.getXBounds().min && this.#x <= ground.object.getXBounds().max && this.#y >= groundY - 50) {
+            this.#y = groundY - 50;
+            this.#isJumping = false;
+            this.#velocityY = 0;
+        } else {
+            // S'il n'est sur aucune plateforme, il devrait "tomber"
+            this.#isJumping = true;
         }
    }
-
-   jump() {
-    if (!this.#isJumping) {
-        this.#isJumping = true;
-        this.#velocityY = -10; 
-    }
-}
 
     /**
      * Sets the character's coordinates.
@@ -81,9 +78,12 @@ class Character {
      * @param {number} y The new y coordinate.
      */
     setPosition(x, y) {
+        const currentTime = Date.now();
         this.#x = x;
-        if (y === -1 && !this.#isJumping) { 
-            this.jump();
+        if (y === -1 && currentTime - this.#lastJumpTime > this.#jumpCooldown) { 
+            this.#isJumping = true; 
+            this.#velocityY = -10;
+            this.#lastJumpTime = currentTime;
         } else {
             this.update();
         }
@@ -94,8 +94,20 @@ class Character {
      * @param {{object: Ground, args: any}} ground The ground below the character.
      */
     clip(ground) {
-        if(!this.#isJumping){
-            this.#y = ground.object.getPointAt(this.#x, ground.args) - 50;
+        let bounds = ground.object.getXBounds();
+        let groundY = ground.object.getPointAt(this.#x, ground.args);
+        if (this.#x >= bounds.min && this.#x <= bounds.max && !this.#isJumping) {
+            this.#y = groundY - 50;
+        } else {
+            this.#isJumping = true; // Forcer le personnage à commencer à tomber
         }
+    }   
+
+    /**
+     * Getter for the character position.
+     * @returns The character position.
+     */
+    position() {
+        return {x: this.#x, y: this.#y};
     }
 }

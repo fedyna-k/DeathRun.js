@@ -84,6 +84,22 @@ class Ground {
                 context.fillRect(x, this.#yLimit, 1, interpolatedY - this.#yLimit);
             }
         }
+
+        context.beginPath(); // Commencer un nouveau chemin pour le dessin
+    context.strokeStyle = "#007BFF"; // Définir la couleur de la ligne
+    context.lineWidth = 2; // Définir l'épaisseur de la ligne
+
+    let startY = this.getPointAt(this.#xa, args); // Obtenir le point Y de départ
+    context.moveTo(this.#xa, startY); // Déplacer le curseur au point de départ
+
+    // Dessiner une ligne en interpolant entre xa et xb
+    for (let x = this.#xa + 1; x <= this.#xb; x++) {
+        let interpolatedY = this.getPointAt(x, args);
+        context.lineTo(x, interpolatedY); // Ajouter un segment de ligne jusqu'au point interpolé
+    }
+
+    context.stroke();
+    
     }
 
 
@@ -112,5 +128,16 @@ class Ground {
         let t = (x - this.#xa) / (this.#xb - this.#xa);
 
         return this.#rotationFunction.apply(this.#ys, [t, this.#xb - this.#xa]);
+    }
+
+    /**
+     * Get the x boundaries of the ground.
+     * @returns The x bounds of the ground.
+     */
+    getXBounds() {
+        return {
+            min: this.#xa,
+            max: this.#xb
+        };
     }
 }

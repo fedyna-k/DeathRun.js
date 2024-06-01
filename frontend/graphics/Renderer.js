@@ -177,15 +177,32 @@ class Renderer {
         this.#context.fillStyle = "black";
         this.#context.fillRect(0, 0, this.#width, this.#height);
         //this.#context.translate(-this.#viewportX, -this.#viewportY);
+
         // Render the light pipeline.
         for (let light of this.#lightPipeline) {
             this.#lightMap[light.key].draw(this.#context, light.x, light.y, light.lightAngle, light.spreadAngle);
         }
 
-        // Render the character pipeline.
         for (let character of this.#charactersPipeline) {
-            character.update(this.#groundPipeline[0]);
-            character.draw(this.#groundPipeline[0]);
+            let charX = character.position().x;
+            let groundsUnder = this.#groundPipeline.filter(ground => ground.object.getXBounds().min <= charX && charX <= ground.object.getXBounds().max);
+            // Trouver la plateforme la la plus proche en dessous du perso
+            let relevantGround = null;
+            let minDistance = Infinity;
+            for (let ground of groundsUnder) {
+                let groundY = ground.object.getPointAt(charX, ground.args);
+                let distance = groundY - character.position().y;
+                if (distance >= 0 && distance < minDistance) {
+                    minDistance = distance;
+                    relevantGround = ground;
+                }
+            }
+
+            if (relevantGround) {
+                character.update(relevantGround);
+                character.clip(relevantGround);
+                character.draw(relevantGround);
+            }
         }
 
         // Render the ground pipeline.

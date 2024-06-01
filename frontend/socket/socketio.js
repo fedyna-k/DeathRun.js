@@ -15,6 +15,8 @@ socket.on('init characters', function(initCharacters) {
             console.log("role du perso : ", char.id, ": " , char.role)
         }
     });
+
+    checkAndDisplayImpostorMessage();
 });
 
 socket.on('new character', function(char) {
@@ -36,36 +38,50 @@ socket.on('remove character', function(charId) {
     }
 });
 
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'e' || event.key === 'E') {
-        if (localPlayerId === trapperId && isNearButton(characterInstances[localPlayerId], button)) {
-            socket.emit('activate button', { buttonId: 1 });
-        }
-    }
-});
-
-// Vérifier la proximité du bouton
-function isNearButton(character, button) {
-    return Math.abs(character.getCoordinates().x - button.x) < 50 && Math.abs(character.getCoordinates().y - button.y) < 50;
-}
-
-// Réagir à l'activation du bouton
-socket.on('button activated', function(data) {
-    console.log(`Le bouton ${data.buttonId} a été activé.`);
-});
-
-
-
-
-
 function createCharacter(char) {
     if (!characterInstances[char.id]) {
         let player = new Character(char.x, char.y, char.color); 
         renderer.insertCharacterIntoPipeline(player);
         characterInstances[char.id] = player;
         charactersData[char.id] = char;
-
     }
+}
+    
+
+function checkAndDisplayImpostorMessage() {
+    Object.values(charactersData).forEach(char => {
+        if (char.role === 'imposter' && char.id === localPlayerId) {
+            displayImpostorMessage();
+        }
+    });
+}
+
+function displayImpostorMessage() {
+    const messageDiv = document.createElement('div');
+
+
+    messageDiv.style.position = 'absolute';
+    messageDiv.style.width = '100%';
+    messageDiv.style.height = '50px';
+    messageDiv.style.top = '30%';
+    messageDiv.style.left = '0';
+    messageDiv.style.transform = 'translateY(-50%)';
+    messageDiv.style.textAlign = 'center';
+    messageDiv.style.color = 'red';
+    messageDiv.style.fontSize = '50px';
+    messageDiv.style.fontWeight = 'bold';
+    messageDiv.style.opacity = '1';
+    messageDiv.style.transition = 'opacity 1s ease';
+    messageDiv.innerText = 'YOU ARE THE IMPOSTOR';
+    document.body.appendChild(messageDiv);
+
+    setTimeout(() => {
+        messageDiv.style.opacity = '0';
+    }, 2000);
+
+    setTimeout(() => {
+        document.body.removeChild(messageDiv);
+    }, 5000);
 }
 
 function updateCharacterPosition(char) {
@@ -86,5 +102,6 @@ function removeCharacter(charId) {
         renderer.removeCharacterFromPipeline(characterInstances[charId]);
         delete characterInstances[charId];
         delete charactersData[charId];
+        checkAndDisplayImpostorMessage();
     }
 }

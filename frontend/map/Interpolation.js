@@ -91,10 +91,11 @@ class Interpolation {
      * @see https://en.wikipedia.org/wiki/Linear_interpolation
      */
     lerpRotation(t, xLength) {
-        if (t < 0 || t > 1) return 0;
+        // if (t < 0 || t > 1) return 0;
 
-        let derivative = this.#b - this.#a;
-        return 1.5 * Math.PI + Math.acos(-derivative / Math.sqrt(derivative * derivative + xLength * xLength));
+        // let derivative = this.#b - this.#a;
+        // return 1.5 * Math.PI + Math.acos(-derivative / Math.sqrt(derivative * derivative + xLength * xLength));
+        return 0;
     }
 
     /**

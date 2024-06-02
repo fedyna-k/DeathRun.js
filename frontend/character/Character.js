@@ -7,19 +7,29 @@ class Character {
     #gravity = 0.2;
     #lastJumpTime; // Timestamp du dernier saut
     #jumpCooldown = 500;
+    #animations; 
+    #currentAnimation; 
+    #frameIndex = 0; 
+    #frameDuration = 5;
+    #frameTimer = 0;
 
     /**
      * Creates a new character on screen (currently a box).
      * @param {number} x The initial x coordinate.
      * @param {number} y The initial y coordinate.
      */
-    constructor(x, y, color) {
+    constructor(x, y, color, animations) {
         this.#x = x;
         this.#y = y;
         this.#color = color;
         this.#velocityY = 0; 
         this.#isJumping = false;
         this.#lastJumpTime = 0;
+        this.#animations = animations; 
+        this.#currentAnimation = 'idle';
+        this.#frameIndex = 0;
+        this.#frameDuration = 10;
+        this.#frameTimer = 0;
     }
 
     /**
@@ -43,11 +53,47 @@ class Character {
         return {x: this.#x, y: this.#y};
     }
 
+    updateAnimation(state) {
+        if (this.#currentAnimation !== state) {
+            this.#currentAnimation = state;
+            this.#frameIndex = 0; 
+            this.#frameTimer = 0; 
+        }
+    }
+
+    updateState(action) {
+        if (this.#currentAnimation !== action) {
+            this.#currentAnimation = action;
+            this.#frameIndex = 0; // Reset frame index on action change
+            this.#frameTimer = 0;
+        }
+    }
+        // Load and initialize animations
+        static loadAnimations(colors) {
+            const animations = {};
+            ['run', 'idle', 'jump','run-left'].forEach(action => {
+                animations[action] = [];
+               
+                for (let i = 1; i <= 4; i++) {
+                    colors.forEach(color => {
+                        const img = new Image();
+                        img.src = `../sprites/${action}${i}.png`;
+                        animations[action].push(img);
+                    });
+                }
+            });
+            return animations;
+        }
+        
     /**
      * Draws the character with proper transformations.
-     * @param {{object: Ground, args: any}} ground The ground below the character.
-     */
+    * @param {{object: Ground, args: any}} ground The ground below the character.
+    */
     draw(context, ground) {
+        let frames = this.#animations[this.#currentAnimation];
+        let frame = frames[this.#frameIndex];
+        let scale_x = 1;
+        let scale_y = 1;
         let rotationAngle;
         if (ground) {
             rotationAngle = ground.object.getRotationAt(this.#x);
@@ -55,24 +101,33 @@ class Character {
             rotationAngle = 0;
         }
 
-        context.save();
-        context.globalCompositeOperation = "soft-light";
-        context.fillStyle = this.#color;
+        const centerX = this.#x;
+        const centerY = this.#y;
 
-        context.translate(this.#x, this.#y + 50);
-        context.rotate(rotationAngle);
-        context.translate(-this.#x, -this.#y - 50);
+        // Adjust drawing coordinates to center sprite in hitbox
+        const drawX = centerX - (frame.width * scale_x) / 2;
+        const drawY = centerY - (frame.height * scale_y) / 2;
 
-        context.fillRect(this.#x - 10, this.#y, 20, 50);
+        context.save(); // Save the current state of the context
+        context.translate(centerX, centerY); // Move to the center of the image
+        context.rotate(rotationAngle); // Rotate the canvas
+        context.translate(-centerX, -centerY); // Move back
 
+
+        context.drawImage(frame, drawX, drawY + 25, frame.width * scale_x, frame.height * scale_y);
         context.restore();
+        // Update frame timer
+        if (++this.#frameTimer >= this.#frameDuration) {
+            this.#frameIndex = (this.#frameIndex + 1) % frames.length;
+            this.#frameTimer = 0;
+        }
     }
 
     drawHitbox(context) {
         let bounds = this.getBounds();
         context.save(); // Save the context state
         context.strokeStyle = "red";
-        context.lineWidth = 2;
+        context.lineWidth = 0;
         context.strokeRect(bounds.xMin, bounds.yMin, bounds.xMax - bounds.xMin, bounds.yMax - bounds.yMin);
         context.restore(); // Restore the context state
     }

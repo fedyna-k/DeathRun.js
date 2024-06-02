@@ -38,6 +38,14 @@ io.on('connection', (socket) => {
         role: imposterId === socket.id ? 'imposter' : 'lambda'
     };
 
+    socket.on('change action', (data) => {
+        const { id, action } = data;
+        if (characters[id]) {
+            characters[id].action = action;
+            io.emit('update character', characters[id]);
+        }
+    });
+
     io.emit('new character', characters[socket.id]);
     socket.emit('init characters', Object.values(characters));
 

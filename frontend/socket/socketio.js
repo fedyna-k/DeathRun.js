@@ -4,7 +4,7 @@ let charactersData = {};
 let characterInstances = {};
 
 let localPlayerId = null;
-
+let animations = Character.loadAnimations(['red', 'blue', 'green', 'orange', 'purple', 'yellow']);
 
 socket.on('init characters', function(initCharacters) {
     initCharacters.forEach(char => {
@@ -32,6 +32,10 @@ socket.on('update character', function(char) {
         displayMessage('Not enough player to play', 'white', 50, 15);
         return;
     }
+    if (characterInstances[char.id]) {
+        characterInstances[char.id].updateState(char.action); 
+        characterInstances[char.id].setPosition(char.x, char.y);
+    }
         updateCharacterPosition(char);
 });
 
@@ -49,7 +53,7 @@ socket.on('jumping', function(charId){
 
 function createCharacter(char) {
     if (!characterInstances[char.id] && renderer) {
-        let player = new Character(char.x, char.y, char.color); 
+        let player = new Character(char.x, char.y, char.color, animations); 
         renderer.insertCharacterIntoPipeline(player);
         characterInstances[char.id] = player;
         charactersData[char.id] = char;

@@ -2,6 +2,8 @@
 
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false; // Disable smoothing to keep edges crisp
+ctx.imageSmoothingQuality = 'high';
 canvas.width = 800;
 canvas.height = 800;
 
@@ -19,17 +21,33 @@ document.addEventListener('keyup', function(event) {
 
 
 function handleInput() {
-    if (keyState["ArrowLeft"]) {
+    let action = null;
+
+    if (keyState["q"]) {
         socket.emit('move character', { id: localPlayerId, x: -10, y: 0 });
+        action = 'run-left';
+    } else if (keyState["d"]) {
+        socket.emit('move character', { id: localPlayerId, x: 10, y: 0 });
+        action = 'run';
     }
-    if (keyState["ArrowRight"]) {
-        socket.emit('move character', { id: localPlayerId,  x: 10, y: 0 });
-    }
+
     if (keyState[" "]) {
-        socket.emit('jump', { id: localPlayerId});
+        socket.emit('jump', { id: localPlayerId });
+        action = 'jump';
     }
-    if (keyState["e"] ||keyState["E"]){
-        socket.emit('grab character', {id: localPlayerId});
+
+    if (keyState["e"] || keyState["E"]) {
+        socket.emit('grab character', { id: localPlayerId });
+
+    }
+
+    // Check if no keys relevant to actions are pressed
+    if (!action && !Object.values(keyState).some(value => value)) {
+        action = 'idle';
+    }
+
+    if (action) {
+        socket.emit('change action', { id: localPlayerId, action: action });
     }
 }
 

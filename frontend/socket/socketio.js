@@ -50,10 +50,12 @@ socket.on('remove character', function(charId) {
 socket.on('jumping', function(charId){
     characterInstances[charId].jump();
 });
+ 
 
 function createCharacter(char) {
     if (!characterInstances[char.id] && renderer) {
-        let player = new Character(char.x, char.y,"#ff0000", animations); 
+
+        let player = new Character(char.x, char.y, char.color, animations, char.pseudo); 
         renderer.insertCharacterIntoPipeline(player);
         characterInstances[char.id] = player;
         charactersData[char.id] = char;
@@ -128,9 +130,7 @@ function updateCharacterPosition(char) {
     // Check if character is on a platform
     if (renderer && !renderer.isCharacterOnPlatform(characterInstances[char.id])) {
         removeCharacter(char.id);
-        if (char.id === localPlayerId){
-            displayMessage("YOU ARE DEAD", "red", 60, 35);
-        }
+        displayMessage("YOU ARE DEAD", "red", 60, 35);
     }
 
     

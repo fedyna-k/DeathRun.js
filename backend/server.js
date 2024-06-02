@@ -10,11 +10,13 @@ app.use(express.json());
 const characters = {};
 let map = null;
 app.use(express.static(path.join(__dirname, '../frontend')));
-
+let pseudo;
+let color;
 
 app.post('/users', (req, res) => {
     console.log(req.body); // Log the received data
-    // Here, you would typically save the data or perform some action.
+    pseudo = req.body.pseudo;
+    color = req.body.color;
     res.json({ message: 'User registered successfully!' }); // Send back some confirmation
 });
 
@@ -41,7 +43,8 @@ io.on('connection', (socket) => {
         id: socket.id,
         x: 200,
         y: 300,
-        color: randomColor,
+        color: color,
+        pseudo: pseudo,
         role: imposterId === socket.id ? 'imposter' : 'lambda'
     };
 

@@ -6,13 +6,6 @@ canvas.width = 800;
 canvas.height = 800;
 
 let renderer = new Renderer(ctx, canvas.width, canvas.height);
-// let ground = new Ground([0, 400], [800, 400], "lerp");
-let platforms = [
-    new Ground([200, 350], [250, 350], "cubic"),
-    new Ground([300, 400], [350, 390], "lerp"),
-    new Ground([550, 320], [600, 330], "smoother"),
-    new Ground([650, 270], [700, 275], "cubic"),
-];
 
 const keyState = {};
 
@@ -43,14 +36,43 @@ function handleInput() {
 
 setInterval(handleInput, 1000 / 30);
 
+noise = Math.floor(Math.random() * 9999) + 1;
+let heightNoise = new Noise(noise, 500, 40);
 
-let heightNoise = new Noise(981, 500, 40);
+// map 1 : 
+let map1 = [
+    new Ground([200, 350], [250, 350], "cubic"),
+    new Ground([300, 400], [350, 390], "lerp"),
+    new Ground([550, 320], [600, 330], "smoother"),
+    new Ground([650, 270], [700, 275], "cubic"),
+    new Ground([400, 180], [450, 180], "cubic"),
+];
+
+// map 2 : 
+let map2 = [
+    new Ground([300, 100], [480, 100], "cubic"),
+    new Ground([250, 400], [350, 370], "smoother"),
+    new Ground([400, 240], [450, 250], "smoother"),
+];
+
+// map 3:
+let map3 = [
+    new Ground([300, 100], [480, 100], "cubic"),
+    new Ground([250, 400], [350, 370], "smoother"),
+    new Ground([400, 240], [450, 250], "smoother"),
+    new Ground([120, 300], [170, 300], "cubic"),
+    new Ground([440, 330], [490, 330], "cubic"),
+];
+
+let maps = [map1, map2, map3];
+
+let platforms = getRandomMap();
+
 let firstHeight = 500;
 let secondHeight = heightNoise.generateNext();
 
 
 for (let i = 1 ; i < 4 ; i++) {
-    console.log([i * 160, firstHeight],  [(i+1) * 160, secondHeight]);
     let ground = new Ground([i * 160, firstHeight], [(i+1) * 160, secondHeight], heightNoise.getTerrainTypeFlag());
     firstHeight = secondHeight;
     secondHeight = heightNoise.generateNext();
@@ -70,3 +92,9 @@ platforms.forEach(platform => {
 renderer.toggleFPSrendering();  
 renderer.run();
 
+
+
+function getRandomMap() {
+    let randomIndex = Math.floor(Math.random() * maps.length);
+    return maps[randomIndex];
+}

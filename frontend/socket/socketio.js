@@ -53,7 +53,7 @@ socket.on('jumping', function(charId){
 
 function createCharacter(char) {
     if (!characterInstances[char.id] && renderer) {
-        let player = new Character(char.x, char.y, char.color, animations); 
+        let player = new Character(char.x, char.y,"#ff0000", animations); 
         renderer.insertCharacterIntoPipeline(player);
         characterInstances[char.id] = player;
         charactersData[char.id] = char;

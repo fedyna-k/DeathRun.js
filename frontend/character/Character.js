@@ -2,6 +2,7 @@ class Character {
     #x;
     #y;
     #color;
+    #name;
     #velocityY;
     #isJumping;
     #gravity = 0.2;
@@ -27,11 +28,16 @@ class Character {
         this.#lastJumpTime = 0;
         this.#animations = animations; 
         this.#currentAnimation = 'idle';
-        this.#frameIndex = 0;
+        this.#frameIndex = 4;
         this.#frameDuration = 10;
         this.#frameTimer = 0;
     }
-
+    setName(name){
+        this.#name = name;
+    }
+    setColor(color){
+        this.#color = color;
+    }
     /**
      * Get the character's bounds
      * @returns {{xMin: number, yMin: number, xMax: number, yMax: number}} The bounds
@@ -100,22 +106,31 @@ class Character {
         } else {
             rotationAngle = 0;
         }
-
+    
         const centerX = this.#x;
         const centerY = this.#y;
-
-        // Adjust drawing coordinates to center sprite in hitbox
+    
+        // Calculate drawing coordinates to center sprite in hitbox
         const drawX = centerX - (frame.width * scale_x) / 2;
         const drawY = centerY - (frame.height * scale_y) / 2;
-
+    
+        // Begin context state manipulation
         context.save(); // Save the current state of the context
         context.translate(centerX, centerY); // Move to the center of the image
         context.rotate(rotationAngle); // Rotate the canvas
-        context.translate(-centerX, -centerY); // Move back
-
-
-        context.drawImage(frame, drawX, drawY + 25, frame.width * scale_x, frame.height * scale_y);
+    
+        // Draw the image
+        context.drawImage(frame, drawX - centerX, drawY - centerY + 25, frame.width * scale_x, frame.height * scale_y);
+    
+       
+        context.font = '16px Arial';
+        context.fillStyle = 'white'; 
+        context.textAlign = 'center'; 
+        context.fillText(this.#name, 0, -frame.height + 55 ); 
+    
+        // Restore the context to its original state
         context.restore();
+    
         // Update frame timer
         if (++this.#frameTimer >= this.#frameDuration) {
             this.#frameIndex = (this.#frameIndex + 1) % frames.length;
@@ -193,4 +208,9 @@ class Character {
     position() {
         return {x: this.#x, y: this.#y};
     }
+
+    
 }
+
+
+

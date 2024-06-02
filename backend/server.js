@@ -5,11 +5,18 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server);
 const path = require ('path');
+app.use(express.json());
 
 const characters = {};
 let map = null;
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+
+app.post('/users', (req, res) => {
+    console.log(req.body); // Log the received data
+    // Here, you would typically save the data or perform some action.
+    res.json({ message: 'User registered successfully!' }); // Send back some confirmation
+});
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));

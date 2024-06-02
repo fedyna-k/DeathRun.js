@@ -24,7 +24,8 @@ const form = document.getElementById('gameForm');
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                window.location.href = 'game.html'; 
+                window.location.href = `game.html?pseudo=${encodeURIComponent(pseudo)}&color=${encodeURIComponent(color)}`;
+
             })
             .catch((error) => {
                 console.error('Error:', error);

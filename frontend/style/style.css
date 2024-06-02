@@ -1,7 +1,10 @@
 body{
   margin: 0;
   padding: 0;
- 
+  background-image: url('../res/deathrunbggame2.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
   
 }
 

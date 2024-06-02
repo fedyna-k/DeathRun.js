@@ -51,6 +51,7 @@ socket.on('remove character', function(charId) {
 socket.on('jumping', function(charId){
     characterInstances[charId].jump();
 });
+ 
 
 socket.on('game over', function(data) {
     if(data.winners === 'imposter'){
@@ -64,7 +65,8 @@ socket.on('game over', function(data) {
 
 function createCharacter(char) {
     if (!characterInstances[char.id] && renderer) {
-        let player = new Character(char.x, char.y,"#ff0000", animations); 
+
+        let player = new Character(char.x, char.y, char.color, animations, char.pseudo); 
         renderer.insertCharacterIntoPipeline(player);
         characterInstances[char.id] = player;
         charactersData[char.id] = char;

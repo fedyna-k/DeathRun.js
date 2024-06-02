@@ -19,10 +19,11 @@ class Character {
      * @param {number} x The initial x coordinate.
      * @param {number} y The initial y coordinate.
      */
-    constructor(x, y, color, animations) {
+    constructor(x, y, color, animations, name) {
         this.#x = x;
         this.#y = y;
         this.#color = color;
+        this.#name = name;
         this.#velocityY = 0; 
         this.#isJumping = false;
         this.#lastJumpTime = 0;
@@ -118,13 +119,14 @@ class Character {
         context.save(); // Save the current state of the context
         context.translate(centerX, centerY); // Move to the center of the image
         context.rotate(rotationAngle); // Rotate the canvas
-    
+        
+        context.fillStyle = this.#color; 
         // Draw the image
         context.drawImage(frame, drawX - centerX, drawY - centerY + 25, frame.width * scale_x, frame.height * scale_y);
-    
+        
        
         context.font = '16px Arial';
-        context.fillStyle = 'white'; 
+        context.fillStyle = this.#color; 
         context.textAlign = 'center'; 
         context.fillText(this.#name, 0, -frame.height + 55 ); 
     
@@ -137,6 +139,8 @@ class Character {
             this.#frameTimer = 0;
         }
     }
+    
+
 
     drawHitbox(context) {
         let bounds = this.getBounds();

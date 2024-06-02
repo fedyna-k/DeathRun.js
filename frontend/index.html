@@ -3,65 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./style/style.css"/>
+    <link rel="stylesheet" href="style/style_menu.css"/>
     <link rel="icon" href="/res/deathrun.png">
 
-    
     <title>DeathRun</title>
-
-    <script src="map/Interpolation.js" defer></script>
-    <script src="map/Ground.js" defer></script>
-
-    <script src="graphics/Light.js" defer></script>
-    <script src="graphics/Renderer.js" defer></script>
-
-    <script src="engine/KeyRecorder.js"></script>
-
-    <script src="character/Character.js"></script>
-
-    <script src="Hamburger/Buger.js" defer></script>
-    
-    <script src="html_imputs/name.js" defer></script>
     <script src="html_imputs/color.js" defer></script>
-    <script src="map/Noise.js" defer></script>
-
-
+    
     <script src="main.js" defer></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="socket/socketio.js" defer></script>
-
-
 </head>
-<body>
-    <div id="mySidenav" class="sidenav">
-        <a id="closeBtn" href="#" class="close">×</a>
-        <ul>
-          <li><a href="#" id="chooseNameLink">Choose a Name</a></li>
-          <li>
-            <input type="text" id="playerName" placeholder="Your Name"  style="display:none;">
-          </li>
-          
-          <li><a href="#">Find a Game</a></li>
-          <li> 
-            Choose a Color
-            <input type="color" class="colorInput" value="#FFFFFF">
-            </li>
-          <li><a href="#"></a></li>
-        </ul>
-        
-      </div>
-      
-      <a href="#" id="openBtn">
-        <span class="burger-icon">
-          <span></span>
-          <span></span>
-          <span></span>
-        </span>
-      </a>
-      
-
-    <div id="canvaContainer">
-        <canvas></canvas>
-    </div>
-</body>
+<form id="gameForm">
+  <label for="pseudo">Pseudo:</label>
+  <input type="text" id="pseudo" name="pseudo" required><br><br>
+  
+  <label for="gameID">Game ID:</label>
+  <input type="text" id="gameID" name="gameID" required><br><br>
+  
+  <label for="color">Couleur:</label>
+  <input type="color" id="color" name="color" value="#FFFFFF"><br><br>
+  
+  <button type="submit">Submit</button>
+</form>
 </html>

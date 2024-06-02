@@ -29,7 +29,7 @@ socket.on('new character', function(char) {
 
 socket.on('update character', function(char) {
     if (!hasAtLeastTwoPlayers()) {
-        displayMessage('Not enough player to play', 'white', 50);
+        displayMessage('Not enough player to play', 'white', 50, 15);
         return;
     }
         updateCharacterPosition(char);
@@ -135,11 +135,6 @@ function removeCharacter(charId) {
         renderer.removeCharacterFromPipeline(characterInstances[charId]);
         delete characterInstances[charId];
         delete charactersData[charId];
-        if (!hasAtLeastTwoPlayers()) {
-            displayMessage('Not enough player to play', 'white', 50, 15);
-            return;
-        }
-        checkAndDisplayImpostorMessage();
     }
 }
 

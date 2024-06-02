@@ -128,7 +128,9 @@ function updateCharacterPosition(char) {
     // Check if character is on a platform
     if (renderer && !renderer.isCharacterOnPlatform(characterInstances[char.id])) {
         removeCharacter(char.id);
-        displayMessage("YOU ARE DEAD", "red", 60, 35);
+        if (char.id === localPlayerId){
+            displayMessage("YOU ARE DEAD", "red", 60, 35);
+        }
     }
 
     

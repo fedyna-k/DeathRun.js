@@ -23,10 +23,10 @@ document.addEventListener('keyup', function(event) {
 function handleInput() {
     let action = null;
 
-    if (keyState["q"]) {
+    if (keyState["q"] || keyState["ArrowLeft"]) {
         socket.emit('move character', { id: localPlayerId, x: -10, y: 0 });
         action = 'run-left';
-    } else if (keyState["d"]) {
+    } else if (keyState["d"] || keyState["ArrowRight"]) {
         socket.emit('move character', { id: localPlayerId, x: 10, y: 0 });
         action = 'run';
     }

@@ -32,13 +32,8 @@ function handleInput() {
     }
 
     if (keyState[" "]) {
-        socket.emit('jump', { id: localPlayerId });
+        socket.emit('jump', { id: localPlayerId});
         action = 'jump';
-    }
-
-    if (keyState["e"] || keyState["E"]) {
-        socket.emit('grab character', { id: localPlayerId });
-
     }
 
     // Check if no keys relevant to actions are pressed

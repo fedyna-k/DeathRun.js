@@ -8,7 +8,7 @@ const path = require ('path');
 app.use(express.json());
 
 const characters = {};
-let map = null;
+const roles = ['imposter', 'sheriff', 'lambda'];
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 
@@ -24,15 +24,18 @@ app.get('/', (req, res) => {
 
 const colors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow'];
 let imposterId = null;
+let sheriffId = null;
 
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    if(map === null){
-        io.emit('init map', 'pasnull');
-    }
-    if (imposterId === null) {
-        imposterId = socket.id; // Le premier joueur devient l'imposteur
+    let roleAssigned = 'lambda';
+    if (!imposterId) {
+        imposterId = socket.id;
+        roleAssigned = 'imposter';  // Le premier joueur devient l'imposteur
+    } else if (!sheriffId && socket.id !== imposterId) {
+        sheriffId = socket.id;
+        roleAssigned = 'sheriff';  // Le deuxième joueur devient le shérif
     }
 
     const localPlayerId = socket.id;
@@ -42,7 +45,7 @@ io.on('connection', (socket) => {
         x: 200,
         y: 300,
         color: randomColor,
-        role: imposterId === socket.id ? 'imposter' : 'lambda'
+        role: roleAssigned
     };
 
     socket.on('change action', (data) => {
@@ -89,68 +92,69 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('grab character', (id) => {
-        // il faut check si un autre joueur est pas loin
-        // si oui, position de l'autre joueur = position du joueur courant + 20y
-        // sinon on fait rien
-    })
-
     socket.on('disconnect', () => {
         console.log('user disconnected');
-        delete characters[socket.id];
         if (imposterId === socket.id) {
-            const remainingIds = Object.keys(characters);
-            imposterId = remainingIds[0] || null; // Nouveau imposteur ou null si plus de joueurs
-            if (imposterId) {
-                characters[imposterId].role = 'imposter';
-                io.emit('update character', characters[imposterId]);
-            }
+            imposterId = assignNewRole('imposter');
+        } else if (sheriffId === socket.id) {
+            sheriffId = assignNewRole('sheriff');
         }
-        if (Object.keys(characters).length === 0) {
-            map = null; // Réinitialise la map à null si aucun joueur n'est connecté
-            console.log("Map has been reset as there are no more players.");
-        }
+        delete characters[socket.id];
         io.emit('remove character', socket.id);
     });
 });
+
+
 
 server.listen(3000, () => {
     console.log('listening on *:3000');
 });
 
 
-function resolveCollision(character1, character2) {
-    let coords1 = {x: character1.x, y: character1.y};
-    let coords2 = {x: character2.x, y: character2.y};
+function resolveCollision(aggressor, victim) {
+    let coords1 = {x: aggressor.x, y: aggressor.y};
+    let coords2 = {x: victim.x, y: victim.y};
 
-     // Calculer le vecteur direction entre les deux personnages
-     let dx = coords2.x - coords1.x;
-     let dy = coords2.y - coords1.y;
- 
-     // Calculer la distance entre les deux personnages
-     let distance = Math.sqrt(dx * dx + dy * dy);
- 
-     // Si la distance est trop petite, éviter la division par zéro
-     if (distance === 0) {
-         distance = 1;
-         dx = 1;
-         dy = 0;
-     }
- 
-     // Définir la force de répulsion (ajustez selon le besoin)
-     const repulsionForce = 20;
- 
-     // Calculer le vecteur de répulsion pour chaque personnage
-     let repulsionX = dx / distance * repulsionForce;
-     let repulsionY = dy / distance * repulsionForce;
-     
-     // Repousser chaque personnage dans la direction opposée
-     character1.x -= repulsionX;
-     character1.y -= repulsionY;
-     character2.x += repulsionX;
-     character2.y += repulsionY;
+    // Calculer le vecteur direction entre les deux personnages
+    let dx = coords2.x - coords1.x;
+    let dy = coords2.y - coords1.y;
 
+    // Calculer la distance entre les deux personnages
+    let distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Si la distance est trop petite, éviter la division par zéro
+    if (distance === 0) {
+        distance = 1;
+        dx = 1;
+        dy = 0;
+    }
+
+    // Force de répulsion infligée et reçue
+    let aggressorForce = 10; // Knockback standard reçu par l'agresseur
+    let victimForce; // Knockback infligé au victime
+
+    if (aggressor.role === 'imposter') {
+        victimForce = 30; // Plus de knockback pour l'imposteur
+    } else if (aggressor.role === 'sheriff') {
+        victimForce = 25; // Moins de knockback que l'imposteur mais plus que lambda
+    } else {
+        victimForce = 15; // Lambda inflige moins de knockback
+    }
+
+    // Calculer le vecteur de répulsion pour chaque personnage
+    let repulsionXAggressor = dx / distance * aggressorForce;
+    let repulsionYAggressor = dy / distance * aggressorForce;
+
+    let repulsionXVictim = dx / distance * victimForce;
+    let repulsionYVictim = dy / distance * victimForce;
+
+    // Repousser chaque personnage dans la direction opposée
+    aggressor.x -= repulsionXAggressor;
+    aggressor.y -= repulsionYAggressor;
+    victim.x += repulsionXVictim;
+    victim.y += repulsionYVictim;
 }
+
 
 function checkCollision(character1, character2) {
 
@@ -163,4 +167,15 @@ function checkCollision(character1, character2) {
         return true;
     }
     return false;
+}
+
+function assignNewRole(oldRole) {
+    const remainingIds = Object.keys(characters).filter(id => characters[id].role === 'lambda');
+    if (remainingIds.length > 0) {
+        const newRoleId = remainingIds[0];
+        characters[newRoleId].role = oldRole;
+        io.emit('update character', characters[newRoleId]);
+        return newRoleId;
+    }
+    return null;
 }

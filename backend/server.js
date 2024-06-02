@@ -50,15 +50,27 @@ io.on('connection', (socket) => {
         
         if (characters[socket.id] && socket.id === localPlayerId) {
             characters[socket.id].x += data.x;
+            characters[socket.id].y += data.y;
             Object.values(characters).forEach(otherChar => {
                 if (otherChar.id !== data.id && checkCollision(characters[data.id], otherChar)) {
                     resolveCollision(characters[data.id], otherChar);
+                    io.emit('update character', otherChar);
                 }
-            });
-            characters[socket.id].y = data.y;
-            
+            }); 
             io.emit('update character', characters[socket.id]);
-            characters[socket.id].y = 0;
+        }
+    });
+
+
+    socket.on('jump', (data) => {
+        // Vérifier s'il y a au moins 2 joueurs connectés
+        if (Object.keys(characters).length < 2) {
+            io.emit('update character', characters[socket.id]);
+            return;
+        }
+        
+        if (characters[socket.id] && socket.id === localPlayerId) {
+            io.emit('jumping', socket.id);
         }
     });
 
@@ -96,18 +108,33 @@ function resolveCollision(character1, character2) {
     let coords1 = {x: character1.x, y: character1.y};
     let coords2 = {x: character2.x, y: character2.y};
 
-    // let overlapX = (coords1.x < coords2.x) ? (coords1.x + 20 - coords2.x) : (coords2.x + 20 - coords1.x);
-    // let overlapY = (coords1.y < coords2.y) ? (coords1.y + 50 - coords2.y) : (coords2.y + 50 - coords1.y);
+     // Calculer le vecteur direction entre les deux personnages
+     let dx = coords2.x - coords1.x;
+     let dy = coords2.y - coords1.y;
+ 
+     // Calculer la distance entre les deux personnages
+     let distance = Math.sqrt(dx * dx + dy * dy);
+ 
+     // Si la distance est trop petite, éviter la division par zéro
+     if (distance === 0) {
+         distance = 1;
+         dx = 1;
+         dy = 0;
+     }
+ 
+     // Définir la force de répulsion (ajustez selon le besoin)
+     const repulsionForce = 20;
+ 
+     // Calculer le vecteur de répulsion pour chaque personnage
+     let repulsionX = dx / distance * repulsionForce;
+     let repulsionY = dy / distance * repulsionForce;
+     
+     // Repousser chaque personnage dans la direction opposée
+     character1.x -= repulsionX;
+     character1.y -= repulsionY;
+     character2.x += repulsionX;
+     character2.y += repulsionY;
 
-    // // Simple repoussement : les personnages sont légèrement décalés à l'opposé l'un de l'autre
-    // if (coords1.x < coords2.x) {
-    //     character1.x = coords1.x - overlapX / 2;
-    //     character2.x = coords2.x + overlapX / 2;
-    // } else {
-    //     character1.x = coords1.x + overlapX / 2;
-    //     character2.x = coords2.x - overlapX / 2;
-    // }
-    character1.x +=20;
 }
 
 function checkCollision(character1, character2) {

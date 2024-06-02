@@ -157,58 +157,7 @@ class Renderer {
      */
     removeCharacterFromPipeline(character) {
         this.#charactersPipeline = this.#charactersPipeline.filter(char => char !== character);
-    }
-
-
-    checkCollision(character1, character2) {
-        if (!character1 || !character2) {
-            return false;
-        }
-    
-        let bounds1 = character1.getBounds();
-        let bounds2 = character2.getBounds();
-    
-        // Check if the bounding boxes overlap
-        if (bounds1.xMin < bounds2.xMax && bounds1.xMax > bounds2.xMin &&
-            bounds1.yMin < bounds2.yMax && bounds1.yMax > bounds2.yMin) {
-            return true;
-        }
-        return false;
-    }
-    
-    handleCollision(character1, character2) {
-        if (this.checkCollision(character1, character2)) {
-            // Push characters away from each other
-            let coords1 = character1.getCoordinates();
-            let coords2 = character2.getCoordinates();
-            
-            // Logic to push characters away from each other
-            // Example:
-            let overlapX = Math.min(coords1.x + 20, coords2.x + 20) - Math.max(coords1.x, coords2.x);
-            let overlapY = Math.min(coords1.y + 50, coords2.y + 50) - Math.max(coords1.y, coords2.y);
-    
-            if (overlapX < overlapY) {
-                if (coords1.x < coords2.x) {
-                    character1.setPosition(coords1.x - overlapX / 2, coords1.y);
-                    character2.setPosition(coords2.x + overlapX / 2, coords2.y);
-                } else {
-                    character1.setPosition(coords1.x + overlapX / 2, coords1.y);
-                    character2.setPosition(coords2.x - overlapX / 2, coords2.y);
-                }
-            } else {
-                if (coords1.y < coords2.y) {
-                    character1.setPosition(coords1.x, coords1.y - overlapY / 2);
-                    character2.setPosition(coords2.x, coords2.y + overlapY / 2);
-                } else {
-                    character1.setPosition(coords1.x, coords1.y + overlapY / 2);
-                    character2.setPosition(coords2.x, coords2.y - overlapY / 2);
-                }
-            }
-            
-            console.log("Collision detected between characters!");
-        }
-    }
-    
+    }    
 
     /**
      * Check if character is on any platform.
@@ -239,13 +188,6 @@ class Renderer {
         for (let light of this.#lightPipeline) {
             if (this.#lightMap[light.key]) {
                 this.#lightMap[light.key].draw(this.#context, light.x, light.y, light.lightAngle, light.spreadAngle);
-            }
-        }
-    
-        // Update and check collisions for each character
-        for (let i = 0; i < this.#charactersPipeline.length; i++) {
-            for (let j = i + 1; j < this.#charactersPipeline.length; j++) {
-                this.handleCollision(this.#charactersPipeline[i], this.#charactersPipeline[j]);
             }
         }
     

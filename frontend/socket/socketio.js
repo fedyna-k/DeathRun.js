@@ -12,14 +12,13 @@ socket.on('init characters', function(initCharacters) {
         if (char.id === socket.id && renderer) {
             localPlayerId = char.id;
             renderer.setViewport(char.x, char.y);
-            console.log("role du perso : ", char.id, ": " , char.role)
         }
     });
+    checkAndDisplayImpostorMessage();
 
     if (!hasAtLeastTwoPlayers()) {
         return;
     }
-    checkAndDisplayImpostorMessage();
 });
 
 socket.on('new character', function(char) {
@@ -44,6 +43,10 @@ socket.on('remove character', function(charId) {
     }
 });
 
+socket.on('jumping', function(charId){
+    characterInstances[charId].jump();
+});
+
 function createCharacter(char) {
     if (!characterInstances[char.id] && renderer) {
         let player = new Character(char.x, char.y, char.color); 
@@ -57,17 +60,23 @@ function createCharacter(char) {
 function checkAndDisplayImpostorMessage() {
     Object.values(charactersData).forEach(char => {
         if (char.role === 'imposter' && char.id === localPlayerId) {
-            displayMessage('YOU ARE THE IMPOSTOR', 'red', 50);
+            displayMessage('YOU ARE THE IMPOSTOR', 'red', 50, 30);
+            displayConstantMessage('Impostor', 'red');
+        }
+        if (char.role === 'lambda' && char.id === localPlayerId) {
+            displayMessage('YOU ARE AN INNOCENT', 'blue', 50, 30);
+            displayConstantMessage('Innocent', 'blue');
         }
     });
 }
 
-function displayMessage(text, color = 'white', fontSize = 30) {
+
+function displayMessage(text, color = 'white', fontSize = 30, top = 20) {
     const messageDiv = document.createElement('div');
     messageDiv.style.position = 'absolute';
     messageDiv.style.width = '100%';
     messageDiv.style.height = '50px';
-    messageDiv.style.top = '20%'; 
+    messageDiv.style.top = `${top}%`; 
     messageDiv.style.left = '0';
     messageDiv.style.transform = 'translateY(-50%)';
     messageDiv.style.textAlign = 'center';
@@ -85,7 +94,25 @@ function displayMessage(text, color = 'white', fontSize = 30) {
 
     setTimeout(() => {
         document.body.removeChild(messageDiv);
-    }, 4000); 
+    }, 4000);
+}
+
+
+
+function displayConstantMessage(text, color = 'white') {
+    const messageDiv = document.createElement('div');
+    messageDiv.style.position = 'absolute';
+    messageDiv.style.width = '100%';
+    messageDiv.style.height = '50px';
+    messageDiv.style.top = '10%'; 
+    messageDiv.style.left = '100';
+    messageDiv.style.transform = 'translateY(-50%)';
+    messageDiv.style.textAlign = 'center';
+    messageDiv.style.color = color;
+    messageDiv.style.fontSize = `20px`;
+    messageDiv.style.fontWeight = 'bold';
+    messageDiv.innerText = text;
+    document.body.appendChild(messageDiv);
 }
 
 function updateCharacterPosition(char) {
@@ -97,7 +124,7 @@ function updateCharacterPosition(char) {
     // Check if character is on a platform
     if (renderer && !renderer.isCharacterOnPlatform(characterInstances[char.id])) {
         removeCharacter(char.id);
-        displayMessage("YOU ARE DEAD", "red", 50);
+        displayMessage("YOU ARE DEAD", "red", 60, 35);
     }
 
     
@@ -109,7 +136,7 @@ function removeCharacter(charId) {
         delete characterInstances[charId];
         delete charactersData[charId];
         if (!hasAtLeastTwoPlayers()) {
-            displayMessage('Not enough player to play', 'white', 50);
+            displayMessage('Not enough player to play', 'white', 50, 15);
             return;
         }
         checkAndDisplayImpostorMessage();

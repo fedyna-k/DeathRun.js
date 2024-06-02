@@ -55,7 +55,7 @@ class Character {
             rotationAngle = 0;
         }
 
-        context.save(); // Save the context state before applying transformations
+        context.save();
         context.globalCompositeOperation = "soft-light";
         context.fillStyle = this.#color;
 
@@ -65,7 +65,7 @@ class Character {
 
         context.fillRect(this.#x - 10, this.#y, 20, 50);
 
-        context.restore(); // Restore the context state to avoid affecting other drawings
+        context.restore();
     }
 
     drawHitbox(context) {
@@ -92,7 +92,7 @@ class Character {
             this.#isJumping = false;
             this.#velocityY = 0;
         } else {
-            // S'il n'est sur aucune plateforme, il devrait "tomber"
+        //     // S'il n'est sur aucune plateforme, il devrait "tomber"
             this.#isJumping = true;
         }
     }
@@ -103,9 +103,12 @@ class Character {
      * @param {number} y The new y coordinate.
      */
     setPosition(x, y) {
-        const currentTime = Date.now();
         this.#x = x;
-        if (y === -1 && currentTime - this.#lastJumpTime > this.#jumpCooldown) { 
+    }
+
+    jump(){
+        const currentTime = Date.now();
+        if (currentTime - this.#lastJumpTime > this.#jumpCooldown) { 
             this.#isJumping = true; 
             this.#velocityY = -10;
             this.#lastJumpTime = currentTime;

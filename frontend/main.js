@@ -26,7 +26,7 @@ function handleInput() {
         socket.emit('move character', { id: localPlayerId,  x: 10, y: 0 });
     }
     if (keyState[" "]) {
-        socket.emit('move character', { id: localPlayerId,  x: 0, y: -1 });
+        socket.emit('jump', { id: localPlayerId});
     }
     if (keyState["e"] ||keyState["E"]){
         socket.emit('grab character', {id: localPlayerId});
@@ -64,12 +64,13 @@ setInterval(handleInput, 1000 / 30);
     let maps = [map1, map2, map3];
     let randomIndex = Math.floor(Math.random() * maps.length);
     let platforms = maps[randomIndex];
+    platforms = map1;
 
     platforms.forEach(platform => {
         renderer.insertGroundIntoPipeline(platform, [20, false]);
     });
-    noise = Math.floor(Math.random() * 9999) + 1;
-    let heightNoise = new Noise(noise, 500, 40);
+    // noise = Math.floor(Math.random() * 9999) + 1;
+    let heightNoise = new Noise(12, 500, 40);
     let firstHeight = 500;
     let secondHeight = heightNoise.generateNext();
 
@@ -81,9 +82,9 @@ setInterval(handleInput, 1000 / 30);
         renderer.insertGroundIntoPipeline(ground, [5, false]);
     }
 
-let white = new Light(1000);
-renderer.addLightSource(white, "w");
-renderer.insertLightIntoPipeline("w", 100, 100, 1, Math.PI);
+let light = new Light(1500);
+renderer.addLightSource(light, "w");
+renderer.insertLightIntoPipeline("w", 100, 100, 0, 2*Math.PI);
 
 renderer.toggleFPSrendering();  
 renderer.run();

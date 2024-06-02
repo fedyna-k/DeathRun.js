@@ -50,7 +50,11 @@ class Character {
      * @param {{object: Ground, args: any}} ground The ground below the character.
      */
     draw(ground) {
-        let rotationAngle = ground.object.getRotationAt(this.#x);
+        let rotationAngle;
+        if(ground){
+            rotationAngle = ground.object.getRotationAt(this.#x);
+        }
+        else rotationAngle = 0;
         
         
         ctx.globalCompositeOperation = "soft-light";

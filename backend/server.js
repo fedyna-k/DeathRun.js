@@ -7,7 +7,7 @@ const io = new Server(server);
 const path = require ('path');
 
 const characters = {};
-
+let map = null;
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 
@@ -21,7 +21,9 @@ let imposterId = null;
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-
+    if(map === null){
+        io.emit('init map', 'pasnull');
+    }
     if (imposterId === null) {
         imposterId = socket.id; // Le premier joueur devient l'imposteur
     }
@@ -39,8 +41,13 @@ io.on('connection', (socket) => {
     io.emit('new character', characters[socket.id]);
     socket.emit('init characters', Object.values(characters));
 
-
     socket.on('move character', (data) => {
+        // Vérifier s'il y a au moins 2 joueurs connectés
+        if (Object.keys(characters).length < 2) {
+            io.emit('update character', characters[socket.id]);
+            return;
+        }
+        
         if (characters[socket.id] && socket.id === localPlayerId) {
             characters[socket.id].x += data.x;
             Object.values(characters).forEach(otherChar => {
@@ -71,6 +78,10 @@ io.on('connection', (socket) => {
                 characters[imposterId].role = 'imposter';
                 io.emit('update character', characters[imposterId]);
             }
+        }
+        if (Object.keys(characters).length === 0) {
+            map = null; // Réinitialise la map à null si aucun joueur n'est connecté
+            console.log("Map has been reset as there are no more players.");
         }
         io.emit('remove character', socket.id);
     });

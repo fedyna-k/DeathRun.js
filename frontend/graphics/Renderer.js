@@ -183,6 +183,16 @@ class Renderer {
     }
 
     /**
+     * Check if character is on any platform.
+     */
+    isCharacterOnPlatform(character) {
+        const charY = character.position().y;
+        if(charY > 700){
+            return false;
+        }return true;
+    }
+
+    /**
      * The rendering core is where all the pipelines are rendered.
      * The rendering order is :
      * - Lights
@@ -210,6 +220,7 @@ class Renderer {
         }
         
         for (let character of this.#charactersPipeline) {
+            character.draw();
             let charX = character.position().x;
             let groundsUnder = this.#groundPipeline.filter(ground => ground.object.getXBounds().min <= charX && charX <= ground.object.getXBounds().max);
             // Trouver la plateforme la la plus proche en dessous du perso
@@ -223,11 +234,9 @@ class Renderer {
                     relevantGround = ground;
                 }
             }
-
             if (relevantGround) {
                 character.update(relevantGround);
-                character.clip(relevantGround);
-                character.draw(relevantGround);
+                character.clip(relevantGround); 
             }
         }
 

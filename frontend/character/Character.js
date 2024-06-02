@@ -22,20 +22,18 @@ class Character {
         this.#lastJumpTime = 0;
     }
 
-
     /**
      * Get the character's bounds
      * @returns {{xMin: number, yMin: number, xMax: number, yMax: number}} The bounds
      */
     getBounds() {
         return {
-            xMin: this.#x,
-            xMax: this.#x + 20,
+            xMin: this.#x - 10,
+            xMax: this.#x + 10,
             yMin: this.#y,
             yMax: this.#y + 50
         };
     }
-
 
     /**
      * Get the character's coordinates.
@@ -46,28 +44,37 @@ class Character {
     }
 
     /**
-     * Draws the beautiful box guy.
+     * Draws the character with proper transformations.
      * @param {{object: Ground, args: any}} ground The ground below the character.
      */
-    draw(ground) {
+    draw(context, ground) {
         let rotationAngle;
-        if(ground){
+        if (ground) {
             rotationAngle = ground.object.getRotationAt(this.#x);
+        } else {
+            rotationAngle = 0;
         }
-        else rotationAngle = 0;
-        
-        
-        ctx.globalCompositeOperation = "soft-light";
-        ctx.fillStyle = this.#color;
 
-        ctx.translate(this.#x, this.#y + 50);
-        ctx.rotate(rotationAngle);
-        ctx.translate(-this.#x, -this.#y - 50);
+        context.save(); // Save the context state before applying transformations
+        context.globalCompositeOperation = "soft-light";
+        context.fillStyle = this.#color;
 
-        ctx.fillRect(this.#x - 10, this.#y, 20, 50);
+        context.translate(this.#x, this.#y + 50);
+        context.rotate(rotationAngle);
+        context.translate(-this.#x, -this.#y - 50);
 
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.globalCompositeOperation = "source-over";
+        context.fillRect(this.#x - 10, this.#y, 20, 50);
+
+        context.restore(); // Restore the context state to avoid affecting other drawings
+    }
+
+    drawHitbox(context) {
+        let bounds = this.getBounds();
+        context.save(); // Save the context state
+        context.strokeStyle = "red";
+        context.lineWidth = 2;
+        context.strokeRect(bounds.xMin, bounds.yMin, bounds.xMax - bounds.xMin, bounds.yMax - bounds.yMin);
+        context.restore(); // Restore the context state
     }
 
     /**
@@ -79,7 +86,7 @@ class Character {
         this.#y += this.#velocityY;
 
         let groundY = ground ? ground.object.getPointAt(this.#x, ground.args) : null;
-        
+
         if (groundY !== null && this.#x >= ground.object.getXBounds().min && this.#x <= ground.object.getXBounds().max && this.#y >= groundY - 50) {
             this.#y = groundY - 50;
             this.#isJumping = false;
@@ -88,7 +95,7 @@ class Character {
             // S'il n'est sur aucune plateforme, il devrait "tomber"
             this.#isJumping = true;
         }
-   }
+    }
 
     /**
      * Sets the character's coordinates.

@@ -161,26 +161,54 @@ class Renderer {
 
 
     checkCollision(character1, character2) {
+        if (!character1 || !character2) {
+            return false;
+        }
+    
         let bounds1 = character1.getBounds();
         let bounds2 = character2.getBounds();
-        // Vérifie si les bounding boxes se chevauchent
+    
+        // Check if the bounding boxes overlap
         if (bounds1.xMin < bounds2.xMax && bounds1.xMax > bounds2.xMin &&
             bounds1.yMin < bounds2.yMax && bounds1.yMax > bounds2.yMin) {
             return true;
         }
         return false;
     }
-
+    
     handleCollision(character1, character2) {
         if (this.checkCollision(character1, character2)) {
-            // Repousser les personnages l'un de l'autre
+            // Push characters away from each other
             let coords1 = character1.getCoordinates();
             let coords2 = character2.getCoordinates();
-            // ici logique on repousse les personnages
             
-            console.log("Collision détectée entre personnages!");
+            // Logic to push characters away from each other
+            // Example:
+            let overlapX = Math.min(coords1.x + 20, coords2.x + 20) - Math.max(coords1.x, coords2.x);
+            let overlapY = Math.min(coords1.y + 50, coords2.y + 50) - Math.max(coords1.y, coords2.y);
+    
+            if (overlapX < overlapY) {
+                if (coords1.x < coords2.x) {
+                    character1.setPosition(coords1.x - overlapX / 2, coords1.y);
+                    character2.setPosition(coords2.x + overlapX / 2, coords2.y);
+                } else {
+                    character1.setPosition(coords1.x + overlapX / 2, coords1.y);
+                    character2.setPosition(coords2.x - overlapX / 2, coords2.y);
+                }
+            } else {
+                if (coords1.y < coords2.y) {
+                    character1.setPosition(coords1.x, coords1.y - overlapY / 2);
+                    character2.setPosition(coords2.x, coords2.y + overlapY / 2);
+                } else {
+                    character1.setPosition(coords1.x, coords1.y + overlapY / 2);
+                    character2.setPosition(coords2.x, coords2.y - overlapY / 2);
+                }
+            }
+            
+            console.log("Collision detected between characters!");
         }
     }
+    
 
     /**
      * Check if character is on any platform.
@@ -205,47 +233,57 @@ class Renderer {
         // Empty screen
         this.#context.fillStyle = "black";
         this.#context.fillRect(0, 0, this.#width, this.#height);
-        //this.#context.translate(-this.#viewportX, -this.#viewportY);
-
+        // this.#context.translate(-this.#viewportX, -this.#viewportY);
+    
         // Render the light pipeline.
         for (let light of this.#lightPipeline) {
-            this.#lightMap[light.key].draw(this.#context, light.x, light.y, light.lightAngle, light.spreadAngle);
+            if (this.#lightMap[light.key]) {
+                this.#lightMap[light.key].draw(this.#context, light.x, light.y, light.lightAngle, light.spreadAngle);
+            }
         }
-
-        // Mettre à jour et vérifier les collisions pour chaque personnage
+    
+        // Update and check collisions for each character
         for (let i = 0; i < this.#charactersPipeline.length; i++) {
             for (let j = i + 1; j < this.#charactersPipeline.length; j++) {
                 this.handleCollision(this.#charactersPipeline[i], this.#charactersPipeline[j]);
             }
         }
-        
+    
         for (let character of this.#charactersPipeline) {
-            character.draw();
-            let charX = character.position().x;
-            let groundsUnder = this.#groundPipeline.filter(ground => ground.object.getXBounds().min <= charX && charX <= ground.object.getXBounds().max);
-            // Trouver la plateforme la la plus proche en dessous du perso
-            let relevantGround = null;
-            let minDistance = Infinity;
-            for (let ground of groundsUnder) {
-                let groundY = ground.object.getPointAt(charX, ground.args);
-                let distance = groundY - character.position().y;
-                if (distance >= 0 && distance < minDistance) {
-                    minDistance = distance;
-                    relevantGround = ground;
+            if (character) {
+                let charX = character.position().x;
+                let groundsUnder = this.#groundPipeline.filter(ground => ground.object.getXBounds().min <= charX && charX <= ground.object.getXBounds().max);
+    
+                // Find the nearest platform below the character
+                let relevantGround = null;
+                let minDistance = Infinity;
+                for (let ground of groundsUnder) {
+                    let groundY = ground.object.getPointAt(charX, ground.args);
+                    let distance = groundY - character.position().y;
+                    if (distance >= 0 && distance < minDistance) {
+                        minDistance = distance;
+                        relevantGround = ground;
+                    }
                 }
-            }
-            if (relevantGround) {
-                character.update(relevantGround);
-                character.clip(relevantGround); 
+    
+                if (relevantGround) {
+                    character.update(relevantGround);
+                    character.clip(relevantGround);
+                } else {
+                    character.update(null);
+                }
+    
+                character.draw(this.#context, relevantGround);
+                character.drawHitbox(this.#context);
             }
         }
-
+    
         // Render the ground pipeline.
         this.#context.fillStyle = "black";
         for (let ground of this.#groundPipeline) {
             ground.object.draw(this.#context, ground.args);
         }
-
+    
         // If wanted, render and compute fps
         if (this.#mustRenderFPS) {
             this.#renderFPS();

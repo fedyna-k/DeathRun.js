@@ -62,7 +62,7 @@ To compile and launch DeathRun.js, follow these steps:
     ```
 4. Start the server:
     ```
-    npm start
+    node ./backend/server.js
     ```
 5. Open your web browser and go to `http://localhost:3000` to start playing!
 

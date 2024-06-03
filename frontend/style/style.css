@@ -1,0 +1,28 @@
+body{
+  margin: 0;
+  padding: 0;
+  background-image: url('../res/deathrunbggame2.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  
+}
+
+#canvaContainer{
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+img{
+width: 4em;
+margin-top: -20px;
+margin-left: 5px;
+
+cursor: pointer;
+transition: 500ms;
+}
+img:hover{
+transform: rotate(5deg);
+}

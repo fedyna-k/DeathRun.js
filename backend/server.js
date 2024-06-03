@@ -13,24 +13,26 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 let pseudo;
 let color;
 
+// on récupère les infos du form
 app.post('/users', (req, res) => {
-    console.log(req.body); // Log the received data
     pseudo = req.body.pseudo;
     color = req.body.color;
-    res.json({ message: 'User registered successfully!' }); // Send back some confirmation
+    res.json({ message: 'dataa sent succesfuly' });
 });
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-const colors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow'];
 let imposterId = null;
 let sheriffId = null;
+let isNoise = false;
 
-
+// on se connecte
 io.on('connection', (socket) => {
     console.log('a user connected');
+
+    // définition des rôles
     let roleAssigned = 'lambda';
     if (!imposterId) {
         imposterId = socket.id;
@@ -39,7 +41,6 @@ io.on('connection', (socket) => {
         sheriffId = socket.id;
         roleAssigned = 'sheriff';  // Le deuxième joueur devient le shérif
     }
-
     const localPlayerId = socket.id;
     characters[socket.id] = {
         id: socket.id,
@@ -48,8 +49,9 @@ io.on('connection', (socket) => {
         color: color,
         pseudo: pseudo,
         role: roleAssigned
-    };
+    };   
 
+    // changement d'action entre idle et courir
     socket.on('change action', (data) => {
         const { id, action } = data;
         if (characters[id]) {
@@ -58,7 +60,10 @@ io.on('connection', (socket) => {
         }
     });
 
+    // émission d'un nouveau personnages à toutes les sockets
     io.emit('new character', characters[socket.id]);
+
+
     socket.emit('init characters', Object.values(characters));
 
     socket.on('move character', (data) => {
@@ -92,6 +97,16 @@ io.on('connection', (socket) => {
             io.emit('jumping', socket.id);
         }
     });
+
+    // socket.on('grab', (data) => {
+    //     Object.values(characters).forEach(otherChar => {
+    //         if (otherChar.id !== data.id && checkCollision(characters[data.id], otherChar)) {
+    //             grab(characters[data.id], otherChar);
+    //             io.emit('update character', otherChar);
+    //             io.emit('update character', characters[socket.id]);
+    //         }
+    //     }); 
+    // });
 
     socket.on('update coords', (coord) => {
         characters[socket.id].x = coord.x;
@@ -167,9 +182,6 @@ function checkCollision(character1, character2) {
     let bounds1 = {xMin: character1.x, xMax: character1.x + 20, yMin: character1.y, yMax: character1.y + 50};
     let bounds2 = {xMin: character2.x, xMax: character2.x + 20, yMin: character2.y, yMax: character2.y + 50};
 
-    console.log("char1", bounds1.yMin);
-    console.log("char2", bounds2.yMin);
-
     // Vérifie si les bounding boxes se chevauchent
     if (bounds1.xMin < bounds2.xMax && bounds1.xMax > bounds2.xMin &&
         bounds1.yMin < bounds2.yMax && bounds1.yMax > bounds2.yMin) {
@@ -187,4 +199,15 @@ function assignNewRole(oldRole) {
         return newRoleId;
     }
     return null;
+}
+
+function grab(theOneGrabbed, theGrabber) {
+    // Calculer la nouvelle position pour 'theOneGrabbed' basée sur la position de 'theGrabber'
+    const grabberWidth = 20; // La largeur du grabber (supposée ici pour le calcul)
+    const grabbedWidth = 20; // La largeur du grabbed
+    const grabberHeight = 50; // La hauteur du grabber
+
+    // Positionner 'theOneGrabbed' à l'horizontale sur les épaules de 'theGrabber'
+    theOneGrabbed.x = theGrabber.x + grabberWidth / 2 - grabbedWidth / 2; // Centrer horizontalement
+    theOneGrabbed.y = theGrabber.y - grabberHeight; // Placer sur les épaules 
 }

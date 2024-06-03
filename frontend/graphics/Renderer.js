@@ -163,7 +163,7 @@ class Renderer {
      * Check if character is on any platform.
      */
     isCharacterOnPlatform(character) {
-        const charY = character.position().y;
+        const charY = character.getCoordinates().y;
         if(charY > 700){
             return false;
         }return true;
@@ -193,7 +193,7 @@ class Renderer {
     
         for (let character of this.#charactersPipeline) {
             if (character) {
-                let charX = character.position().x;
+                let charX = character.getCoordinates().x;
                 let groundsUnder = this.#groundPipeline.filter(ground => ground.object.getXBounds().min <= charX && charX <= ground.object.getXBounds().max);
     
                 // Find the nearest platform below the character
@@ -201,7 +201,7 @@ class Renderer {
                 let minDistance = Infinity;
                 for (let ground of groundsUnder) {
                     let groundY = ground.object.getPointAt(charX, ground.args);
-                    let distance = groundY - character.position().y;
+                    let distance = groundY - character.getCoordinates().y;
                     if (distance >= 0 && distance < minDistance) {
                         minDistance = distance;
                         relevantGround = ground;

@@ -2,7 +2,7 @@ var socket = io();
 
 let charactersData = {};
 let characterInstances = {};
-let gameState = false;
+let gameState = true;
 let localPlayerId = null;
 let animations = Character.loadAnimations(['red', 'blue', 'green', 'orange', 'purple', 'yellow']);
 
@@ -13,13 +13,7 @@ socket.on('init characters', function(initCharacters) {
             localPlayerId = char.id;
         }
     });
-    checkAndDisplayImpostorMessage();
-    if (!hasAtLeastTwoPlayers()) {
-        return;
-    }
-    gameState = true;
-
-    
+    checkAndDisplayImpostorMessage();    
 });
 
 socket.on('new character', function(char) {
@@ -29,7 +23,7 @@ socket.on('new character', function(char) {
 });
 
 socket.on('update character', function(char) {
-    if (!hasAtLeastTwoPlayers()) {
+    if (!hasAtLeastTwoPlayers() && gameState) {
         displayMessage('Not enough player to play', 'white', 50, 15);
         return;
     }
@@ -52,16 +46,6 @@ socket.on('jumping', function(charId){
     characterInstances[charId].jump();
 });
  
-
-socket.on('game over', function(data) {
-    if(data.winners === 'imposter'){
-        displayMessage("THE GAME IS OVER.", "red", 50, 30);
-        displayMessage("IMPOSTER WINS!", "red", 50, 40);
-    }else {
-        displayMessage("THE GAME IS OVER.", "blue", 50, 30);
-        displayMessage("INNOCENTS WINS!", "blue", 50, 40);
-    }
-});
 
 function createCharacter(char) {
     if (!characterInstances[char.id] && renderer) {
@@ -140,6 +124,7 @@ function updateCharacterPosition(char) {
 
     // Check if character is on a platform
     if (renderer && !renderer.isCharacterOnPlatform(characterInstances[char.id])) {
+        console.log(char);
         removeCharacter(char.id);
         if (char.id === localPlayerId){
             displayMessage("YOU ARE DEAD", "red", 60, 60);
@@ -147,26 +132,35 @@ function updateCharacterPosition(char) {
         if (char.role === 'imposter'){
             displayMessage("THE GAME IS OVER.", "blue", 50, 30, 10000)
             displayMessage("INNOCENTS WIN !", "blue", 50, 40, 10000)
-            gameState = false;
-            io.emit('game over', { winner: 'innocents' });
-        }
-        let lambdaOrSheriffAlive = false;
-
-        for (const id in charactersData) {
-            if (charactersData[id].role === 'lambda' || charactersData[id].role === 'sheriff') {
-                lambdaOrSheriffAlive = true;
-                break;
+            endGame();
+        }else{
+            let lambdaOrSheriffAlive = false;
+            for (const id in charactersData) {
+                console.log(charactersData[id].role);
+                if (charactersData[id].role === 'lambda' || charactersData[id].role === 'sheriff') {
+                    lambdaOrSheriffAlive = true;
+                    break;
+                }
             }
-        }
-
-        if (!lambdaOrSheriffAlive) {
-            displayMessage("THE GAME IS OVER.", "red", 50, 30, 10000);
-            displayMessage("IMPOSTER WINS!", "red", 50, 40, 10000);
-            gameState = false;
-            io.emit('game over', { winner: 'imposter' });
+            if (!lambdaOrSheriffAlive) {
+                displayMessage("THE GAME IS OVER.", "red", 50, 30, 10000);
+                displayMessage("IMPOSTER WINS!", "red", 50, 40, 10000);
+                endGame();
+            }
         }
     }
 }
+
+function endGame(){
+    gameState = false;
+    Object.keys(characterInstances).forEach(charId => {
+        removeCharacter(charId)
+    })
+    setTimeout(() => {
+        window.location.href = 'index.html';  // Redirection vers index.html
+    }, 10000);
+}
+
 
 function removeCharacter(charId) {
     if (characterInstances[charId] && renderer) {

@@ -41,7 +41,6 @@ io.on('connection', (socket) => {
     }
 
     const localPlayerId = socket.id;
-    const randomColor = colors[Math.floor(Math.random() * colors.length)]
     characters[socket.id] = {
         id: socket.id,
         x: 200,
@@ -89,11 +88,15 @@ io.on('connection', (socket) => {
             io.emit('update character', characters[socket.id]);
             return;
         }
-        
         if (characters[socket.id] && socket.id === localPlayerId) {
             io.emit('jumping', socket.id);
         }
     });
+
+    socket.on('update coords', (coord) => {
+        characters[socket.id].x = coord.x;
+        characters[socket.id].y = coord.y;
+    })
 
     socket.on('disconnect', () => {
         console.log('user disconnected');
@@ -163,6 +166,9 @@ function checkCollision(character1, character2) {
 
     let bounds1 = {xMin: character1.x, xMax: character1.x + 20, yMin: character1.y, yMax: character1.y + 50};
     let bounds2 = {xMin: character2.x, xMax: character2.x + 20, yMin: character2.y, yMax: character2.y + 50};
+
+    console.log("char1", bounds1.yMin);
+    console.log("char2", bounds2.yMin);
 
     // Vérifie si les bounding boxes se chevauchent
     if (bounds1.xMin < bounds2.xMax && bounds1.xMax > bounds2.xMin &&

@@ -5,14 +5,12 @@ const form = document.getElementById('gameForm');
             event.preventDefault();
             
             const pseudo = document.getElementById('pseudo').value;
-            const gameID = document.getElementById('gameID').value;
             const color = colorInput.value;
 
             console.log(`Pseudo: ${pseudo}`);
-            console.log(`Game ID: ${gameID}`);
             console.log(`Color: ${color}`);
 
-            const data = { pseudo, gameID, color };
+            const data = { pseudo, color };
             
             fetch('/users', {
                 method: 'POST',

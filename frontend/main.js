@@ -22,9 +22,9 @@ document.addEventListener('keyup', function(event) {
 
 function handleInput() {
     let action = null;
-
+    socket.emit('update coords', {x: characterInstances[localPlayerId].getCoordinates().x, y: characterInstances[localPlayerId].getCoordinates().y})
     if (keyState["q"] || keyState["ArrowLeft"]) {
-        socket.emit('move character', { id: localPlayerId, x: -10, y: 0 });
+        socket.emit('move character', { id: localPlayerId, x: -10, y: 0});
         action = 'run-left';
     } else if (keyState["d"] || keyState["ArrowRight"]) {
         socket.emit('move character', { id: localPlayerId, x: 10, y: 0 });

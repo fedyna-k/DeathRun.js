@@ -203,17 +203,7 @@ class Character {
         } else {
             this.#isJumping = true; // Forcer le personnage à commencer à tomber
         }
-    }   
-
-    /**
-     * Getter for the character position.
-     * @returns The character position.
-     */
-    position() {
-        return {x: this.#x, y: this.#y};
-    }
-
-    
+    }      
 }
 
 

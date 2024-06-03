@@ -8,16 +8,16 @@ const path = require ('path');
 app.use(express.json());
 
 const characters = {};
-const roles = ['imposter', 'sheriff', 'lambda'];
 app.use(express.static(path.join(__dirname, '../frontend')));
 let pseudo;
 let color;
+ 
 
 // on récupère les infos du form
 app.post('/users', (req, res) => {
     pseudo = req.body.pseudo;
     color = req.body.color;
-    res.json({ message: 'dataa sent succesfuly' });
+    res.json({ message: 'data sent succesfuly' });
 });
 
 app.get('/', (req, res) => {
@@ -26,7 +26,6 @@ app.get('/', (req, res) => {
 
 let imposterId = null;
 let sheriffId = null;
-let isNoise = false;
 
 // on se connecte
 io.on('connection', (socket) => {
@@ -42,14 +41,16 @@ io.on('connection', (socket) => {
         roleAssigned = 'sheriff';  // Le deuxième joueur devient le shérif
     }
     const localPlayerId = socket.id;
+    let xRand = Math.floor(Math.random() * (500 - 200 + 1)) + 200;
     characters[socket.id] = {
         id: socket.id,
-        x: 200,
+        x: xRand,
         y: 300,
         color: color,
         pseudo: pseudo,
         role: roleAssigned,
-        isGrabbed: false
+        isGrabbed: false,
+        lastGrab : 0,
     };   
 
     // changement d'action entre idle et courir
@@ -74,12 +75,10 @@ io.on('connection', (socket) => {
             return;
         }
 
-        Object.values(characters).forEach(otherChar => {
-            if (otherChar.id !== socket.id && otherChar.isGrabbed) {
-                return;
-            }
-        }); 
-        
+        if (characters[socket.id] && socket.id === localPlayerId && characters[socket.id].isGrabbed) {
+            return;
+        }
+    
         if (characters[socket.id] && socket.id === localPlayerId) {
             characters[socket.id].x += data.x;
             characters[socket.id].y += data.y;
@@ -112,11 +111,15 @@ io.on('connection', (socket) => {
 
     socket.on('grab', (data) => {
         Object.values(characters).forEach(otherChar => {
-            if (otherChar.id !== data.id && checkCollisionForGrabbing(characters[data.id], otherChar)) {
+            if (otherChar.id !== data.id && checkCollisionForGrabbing(characters[data.id], otherChar) && !characters[data.id].isGrabbed) {
                 grab(characters[data.id], otherChar);
                 otherChar.isGrabbed = true;
                 io.emit('update character', otherChar);
                 io.emit('update character', characters[socket.id]);
+                setTimeout(() => {
+                    otherChar.isGrabbed = false; // Relâche le personnage après 3 secondes
+                    io.emit('update character', otherChar);
+                }, 2000);
             }
         }); 
     });
@@ -127,7 +130,7 @@ io.on('connection', (socket) => {
         Object.values(characters).forEach(otherChar => {
             if (otherChar.id !== socket.id && otherChar.isGrabbed) {
                 otherChar.x = characters[socket.id].x;
-                otherChar.y = characters[socket.id].y;
+                otherChar.y = characters[socket.id].y - 60;
                 io.emit('update character', otherChar);
                 io.emit('update character', characters[socket.id]);
             }
@@ -267,12 +270,7 @@ function assignNewRole(oldRole) {
 }
 
 function grab(theGrabber, theOneGrabbed) {
-    // Calculer la nouvelle position pour 'theOneGrabbed' basée sur la position de 'theGrabber'
-    const grabberWidth = 20; // La largeur du grabber
-    const grabbedWidth = 20; // La largeur du grabbed
-    const grabberHeight = 60; // La hauteur du grabber
-
-    // Positionner 'theOneGrabbed' à l'horizontale sur les épaules de 'theGrabber'
-    // theOneGrabbed.x = theGrabber.x + grabberWidth / 2 - grabbedWidth / 2; // Centrer horizontalement
+    const grabberHeight = 60; 
+    //sur les épaules
     theOneGrabbed.y = theGrabber.y - grabberHeight; // Placer sur les épaules 
 }

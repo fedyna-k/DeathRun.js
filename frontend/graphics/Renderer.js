@@ -218,7 +218,7 @@ class Renderer {
                 }
     
                 character.draw(this.#context, relevantGround);
-                character.drawHitbox(this.#context);
+                // character.drawHitbox(this.#context);
             }
         }
     

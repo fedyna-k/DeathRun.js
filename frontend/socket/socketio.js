@@ -126,7 +126,6 @@ function updateCharacterPosition(char) {
 
     // Check if character is on a platform
     if (renderer && !renderer.isCharacterOnPlatform(characterInstances[char.id])) {
-        console.log(char);
         removeCharacter(char.id);
         if (char.id === localPlayerId){
             displayMessage("YOU ARE DEAD", "red", 60, 60);
@@ -138,7 +137,6 @@ function updateCharacterPosition(char) {
         }else{
             let lambdaOrSheriffAlive = false;
             for (const id in charactersData) {
-                console.log(charactersData[id].role);
                 if (charactersData[id].role === 'lambda' || charactersData[id].role === 'sheriff') {
                     lambdaOrSheriffAlive = true;
                     break;

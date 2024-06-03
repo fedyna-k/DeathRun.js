@@ -34,6 +34,7 @@ class Character {
         this.#frameDuration = 10;
         this.#frameTimer = 0;
         this.#isGrabbed = false;
+        
     }
     setName(name){
         this.#name = name;
@@ -80,16 +81,20 @@ class Character {
     }
 
     updateState(action) {
+        if(this.#isGrabbed){
+            action = "grabbed";
+        }
         if (this.#currentAnimation !== action) {
             this.#currentAnimation = action;
             this.#frameIndex = 0; // Reset frame index on action change
             this.#frameTimer = 0;
         }
+
     }
         // Load and initialize animations
         static loadAnimations(colors) {
             const animations = {};
-            ['run', 'idle', 'jump','run-left'].forEach(action => {
+            ['run', 'idle', 'jump','run-left', 'grabbed'].forEach(action => {
                 animations[action] = [];
                
                 for (let i = 1; i <= 4; i++) {
@@ -181,7 +186,7 @@ class Character {
         this.#velocityY += this.#gravity; // Applique la gravité
         this.#velocityY *= 0.99;
         this.#y += this.#velocityY;
-        
+
         let groundY = ground ? ground.object.getPointAt(this.#x, ground.args) : null;
 
         if (groundY !== null && this.#x >= ground.object.getXBounds().min && this.#x <= ground.object.getXBounds().max && this.#y >= groundY - 50) {

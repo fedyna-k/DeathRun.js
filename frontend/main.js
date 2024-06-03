@@ -17,6 +17,7 @@ document.addEventListener('keyup', function(event) {
     keyState[event.key] = false;
 });
 
+let lastGrabTime = 0;
 
 function handleInput() {
     let action = null;
@@ -34,8 +35,9 @@ function handleInput() {
         action = 'jump';
     }
 
-    if (keyState["e"] || keyState["E"]) {
+    if (keyState["e"] || keyState["E"] && Date.now() - lastGrabTime >= 3000) {
         socket.emit('grab', { id: localPlayerId});
+        lastGrabTime = Date.now();
     }
 
     // Check if no keys relevant to actions are pressed
@@ -47,6 +49,8 @@ function handleInput() {
         socket.emit('change action', { id: localPlayerId, action: action });
     }
 }
+
+
 function getQueryVariable(variable) {
     var query = window.location.search.substring(1);
     var vars = query.split('&');

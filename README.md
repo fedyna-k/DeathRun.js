@@ -40,16 +40,33 @@
 > [!NOTE]
 > All commits are available [here](https://github.com/fedyna-k/DeathRun.js/commits/main).
 
-## 🎮 The game 🎮
+## 🎮 The Game 🎮
 
-> [!IMPORTANT]
-> Must be written...
+DeathRun.js is a multiplayer browser-based game where players are divided into roles: an Impostor, a Sheriff, and Innocents. The goal for the Impostor is to eliminate everyone without being caught, while the Sheriff and the Innocents work together to identify and stop the Impostor. The game ends when either all Innocents are eliminated or the Impostor is defeated.
 
-## 💻 Compiling and launching the game 💻
+## 💻 Compiling and Launching the Game 💻
 
-> [!IMPORTANT]
-> Must be written...
+To compile and launch DeathRun.js, follow these steps:
+
+1. Clone the repository:
+    ```
+    git clone https://github.com/fedyna-k/DeathRun.js.git
+    ```
+2. Navigate to the project directory:
+    ```
+    cd DeathRun.js
+    ```
+3. Install dependencies:
+    ```
+    npm install
+    ```
+4. Start the server:
+    ```
+    npm start
+    ```
+5. Open your web browser and go to `http://localhost:3000` to start playing!
 
 ## 📖 License 📖
 
-[GNU General Public License v3.0](https://github.com/fedyna-k/DeathRun.js/blob/main/LICENSE)
+This project is licensed under the [GNU General Public License v3.0](https://github.com/fedyna-k/DeathRun.js/blob/main/LICENSE). Please refer to the license for more detailed information.
+

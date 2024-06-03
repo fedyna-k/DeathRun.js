@@ -28,6 +28,8 @@ socket.on('update character', function(char) {
         return;
     }
     if (characterInstances[char.id] && gameState) {
+        console.log(char.isGrabbed, char.id);
+        characterInstances[char.id].setIsGrabbed(char.isGrabbed);
         characterInstances[char.id].updateState(char.action); 
         characterInstances[char.id].setPosition(char.x, char.y);
     }

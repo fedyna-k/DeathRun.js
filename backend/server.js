@@ -48,7 +48,8 @@ io.on('connection', (socket) => {
         y: 300,
         color: color,
         pseudo: pseudo,
-        role: roleAssigned
+        role: roleAssigned,
+        isGrabbed: false
     };   
 
     // changement d'action entre idle et courir
@@ -72,12 +73,18 @@ io.on('connection', (socket) => {
             io.emit('update character', characters[socket.id]);
             return;
         }
+
+        Object.values(characters).forEach(otherChar => {
+            if (otherChar.id !== socket.id && otherChar.isGrabbed) {
+                return;
+            }
+        }); 
         
         if (characters[socket.id] && socket.id === localPlayerId) {
             characters[socket.id].x += data.x;
             characters[socket.id].y += data.y;
             Object.values(characters).forEach(otherChar => {
-                if (otherChar.id !== data.id && checkCollision(characters[data.id], otherChar)) {
+                if (otherChar.id !== data.id && checkCollision(characters[data.id], otherChar) && !otherChar.isGrabbed) {
                     resolveCollision(characters[data.id], otherChar);
                     io.emit('update character', otherChar);
                 }
@@ -93,24 +100,38 @@ io.on('connection', (socket) => {
             io.emit('update character', characters[socket.id]);
             return;
         }
+        if (characters[socket.id] && socket.id === localPlayerId){
+            characters[socket.id].isGrabbed = false;
+            io.emit('update character', characters[socket.id]);
+        }
+                
         if (characters[socket.id] && socket.id === localPlayerId) {
             io.emit('jumping', socket.id);
         }
     });
 
-    // socket.on('grab', (data) => {
-    //     Object.values(characters).forEach(otherChar => {
-    //         if (otherChar.id !== data.id && checkCollision(characters[data.id], otherChar)) {
-    //             grab(characters[data.id], otherChar);
-    //             io.emit('update character', otherChar);
-    //             io.emit('update character', characters[socket.id]);
-    //         }
-    //     }); 
-    // });
+    socket.on('grab', (data) => {
+        Object.values(characters).forEach(otherChar => {
+            if (otherChar.id !== data.id && checkCollisionForGrabbing(characters[data.id], otherChar)) {
+                grab(characters[data.id], otherChar);
+                otherChar.isGrabbed = true;
+                io.emit('update character', otherChar);
+                io.emit('update character', characters[socket.id]);
+            }
+        }); 
+    });
 
     socket.on('update coords', (coord) => {
         characters[socket.id].x = coord.x;
         characters[socket.id].y = coord.y;
+        Object.values(characters).forEach(otherChar => {
+            if (otherChar.id !== socket.id && otherChar.isGrabbed) {
+                otherChar.x = characters[socket.id].x;
+                otherChar.y = characters[socket.id].y;
+                io.emit('update character', otherChar);
+                io.emit('update character', characters[socket.id]);
+            }
+        }); 
     })
 
     socket.on('disconnect', () => {
@@ -190,6 +211,50 @@ function checkCollision(character1, character2) {
     return false;
 }
 
+function checkCollisionForGrabbing(character1, character2) {
+
+    let bounds1 = {xMin: character1.x, xMax: character1.x + 20, yMin: character1.y, yMax: character1.y + 50};
+    let bounds2 = {xMin: character2.x, xMax: character2.x + 20, yMin: character2.y, yMax: character2.y + 50};
+
+    const padding = 15;
+    // Calcul des nouvelles dimensions avec un 'padding' supplémentaire
+    const paddedWidth1 = (bounds1.xMax - bounds1.xMin) + padding * 2;
+    const paddedHeight1 = (bounds1.yMax - bounds1.yMin) + padding;
+
+    // Déplacement du rectangle vers le haut et la gauche de 'padding' pixels
+    const newX1 = bounds1.xMin - padding;
+    const newY1 = bounds1.yMin - padding;
+
+    bounds1 = {
+        xMin: newX1,
+        xMax: newX1 + paddedWidth1,
+        yMin: newY1,
+        yMax: newY1 + paddedHeight1
+    };
+
+    // Calcul des nouvelles dimensions avec un 'padding' supplémentaire
+    const paddedWidth2 = (bounds2.xMax - bounds2.xMin) + padding * 2;
+    const paddedHeight2 = (bounds2.yMax - bounds2.yMin) + padding;
+
+    // Déplacement du rectangle vers le haut et la gauche de 'padding' pixels
+    const newX2 = bounds2.xMin - padding;
+    const newY2 = bounds2.yMin - padding;
+
+    bounds2 = {
+        xMin: newX2,
+        xMax: newX2 + paddedWidth2,
+        yMin: newY2,
+        yMax: newY2 + paddedHeight2
+    };
+
+    // Vérifie si les bounding boxes se chevauchent
+    if (bounds1.xMin < bounds2.xMax && bounds1.xMax > bounds2.xMin &&
+        bounds1.yMin < bounds2.yMax && bounds1.yMax > bounds2.yMin) {
+        return true;
+    }
+    return false;
+}
+
 function assignNewRole(oldRole) {
     const remainingIds = Object.keys(characters).filter(id => characters[id].role === 'lambda');
     if (remainingIds.length > 0) {
@@ -201,13 +266,13 @@ function assignNewRole(oldRole) {
     return null;
 }
 
-function grab(theOneGrabbed, theGrabber) {
+function grab(theGrabber, theOneGrabbed) {
     // Calculer la nouvelle position pour 'theOneGrabbed' basée sur la position de 'theGrabber'
-    const grabberWidth = 20; // La largeur du grabber (supposée ici pour le calcul)
+    const grabberWidth = 20; // La largeur du grabber
     const grabbedWidth = 20; // La largeur du grabbed
-    const grabberHeight = 50; // La hauteur du grabber
+    const grabberHeight = 60; // La hauteur du grabber
 
     // Positionner 'theOneGrabbed' à l'horizontale sur les épaules de 'theGrabber'
-    theOneGrabbed.x = theGrabber.x + grabberWidth / 2 - grabbedWidth / 2; // Centrer horizontalement
+    // theOneGrabbed.x = theGrabber.x + grabberWidth / 2 - grabbedWidth / 2; // Centrer horizontalement
     theOneGrabbed.y = theGrabber.y - grabberHeight; // Placer sur les épaules 
 }

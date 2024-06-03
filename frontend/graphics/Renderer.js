@@ -209,8 +209,10 @@ class Renderer {
                 }
     
                 if (relevantGround) {
-                    character.update(relevantGround);
-                    character.clip(relevantGround);
+                    if(!character.isGrab()){
+                        character.update(relevantGround);
+                        character.clip(relevantGround);
+                    }
                 } else {
                     character.update(null);
                 }

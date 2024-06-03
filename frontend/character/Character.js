@@ -13,6 +13,7 @@ class Character {
     #frameIndex = 0; 
     #frameDuration = 5;
     #frameTimer = 0;
+    #isGrabbed;
 
     /**
      * Creates a new character on screen (currently a box).
@@ -32,6 +33,7 @@ class Character {
         this.#frameIndex = 4;
         this.#frameDuration = 10;
         this.#frameTimer = 0;
+        this.#isGrabbed = false;
     }
     setName(name){
         this.#name = name;
@@ -59,6 +61,15 @@ class Character {
     getCoordinates() {
         return {x: this.#x, y: this.#y};
     }
+    
+    setIsGrabbed(b){
+        this.#isGrabbed = b;
+    }
+
+    isGrab(){
+        return this.#isGrabbed;
+    }
+
 
     updateAnimation(state) {
         if (this.#currentAnimation !== state) {
@@ -147,7 +158,16 @@ class Character {
         context.save(); // Save the context state
         context.strokeStyle = "red";
         context.lineWidth = 0;
-        context.strokeRect(bounds.xMin, bounds.yMin, bounds.xMax - bounds.xMin, bounds.yMax - bounds.yMin);
+        const padding = 15;
+        // Calcul des nouvelles dimensions avec un 'padding' supplémentaire
+        const paddedWidth = (bounds.xMax - bounds.xMin) + padding * 2;
+        const paddedHeight = (bounds.yMax - bounds.yMin) + padding;
+
+        // Déplacement du rectangle vers le haut et la gauche de 'padding' pixels
+        const newX = bounds.xMin - padding;
+        const newY = bounds.yMin - padding;
+
+        context.strokeRect(newX, newY, paddedWidth, paddedHeight);
         context.restore(); // Restore the context state
     }
 
@@ -155,10 +175,13 @@ class Character {
      * Update the coordinates, not that fancy for the moment.
      */
     update(ground) {
+
+        
+
         this.#velocityY += this.#gravity; // Applique la gravité
         this.#velocityY *= 0.99;
         this.#y += this.#velocityY;
-
+        
         let groundY = ground ? ground.object.getPointAt(this.#x, ground.args) : null;
 
         if (groundY !== null && this.#x >= ground.object.getXBounds().min && this.#x <= ground.object.getXBounds().max && this.#y >= groundY - 50) {
@@ -178,6 +201,7 @@ class Character {
      */
     setPosition(x, y) {
         this.#x = x;
+        this.#y = y;
     }
 
     jump(){
@@ -196,8 +220,10 @@ class Character {
      * @param {{object: Ground, args: any}} ground The ground below the character.
      */
     clip(ground) {
+
         let bounds = ground.object.getXBounds();
         let groundY = ground.object.getPointAt(this.#x, ground.args);
+        
         if (this.#x >= bounds.min && this.#x <= bounds.max && !this.#isJumping) {
             this.#y = groundY - 50;
         } else {
